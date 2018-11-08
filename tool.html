@@ -1,0 +1,2192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>点部区划</title>
+    <!-- start: Css -->
+    <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="files/bootstrap.min.css">
+    <!-- plugins -->
+    <link rel="stylesheet" type="text/css" href="files/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="files/animate.min.css">
+    <link rel="stylesheet" href="files/style.css">
+    <!-- end: Css -->
+
+    <link rel="shortcut icon" href="TY.ico">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        html, body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            overflow-y: hidden;
+        }
+
+        #container {
+            width: 100%;
+            height: 0px;
+        }
+
+        #spin {
+            background-color: #2196F3;
+            border-radius: 3px;
+            padding: 4px 8px;
+            color: white;
+            font-size: 13px;
+            box-shadow: #cccccc 2px 2px 2px;
+        }
+
+        .eye_click {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            z-index: 1000;
+            /* border: 1px solid red;*/
+            padding: 5px 20px 15px 20px;
+            text-shadow: #cccccc 1px 1px 1px;
+            color: #918C8C;
+        }
+
+    </style>
+
+</head>
+<body id="mimin" class="dashboard">
+<!-- start: Header -->
+<nav class="navbar navbar-default header navbar-fixed-top">
+    <div class="col-md-12 nav-wrapper">
+        <div class="navbar-header" style="width:100%;">
+            <div class="opener-left-menu is-open">
+                <span class="top"></span>
+                <span class="middle"></span>
+                <span class="bottom"></span>
+            </div>
+            <a href="index.aspx" title="地图服务" class="navbar-brand">
+                <b> KYE</b>
+            </a>
+        </div>
+    </div>
+</nav>
+<!-- end: Header -->
+<div class="container-fluid mimin-wrapper">
+    <!-- start:Left Menu -->
+    <div id="left-menu">
+        <div style="padding-top: 58px">
+            <div class="sub-left-menu scroll" tabindex="5000" style="overflow: hidden; outline: none;">
+                <ul class="nav nav-list" id="printMenu">
+                </ul>
+
+            </div>
+
+
+        </div>
+
+    </div>
+    <!-- end: Left Menu -->
+    <!-- start: content -->
+    <div id="content">
+
+        <div class="panel" id="rightContent">
+            <div class="input-group-btn " style="position: absolute;right: 150px;top:85px;z-index: 20000">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="true">编辑<span class="caret"></span></button>
+                <ul class="dropdown-menu dropdown-menu-left">
+                    <li><a href="#">面拆分</a></li>
+                    <li><a href="#" onclick="lineclippolygon()">线拆分 </a></li>
+                    <li><a href="#">合并 </a></li>
+                    <!--  <li role="separator" class="divider"></li>-->
+                    <li><a href="#">沿路画区 </a></li>
+                    <li><a href="#">沿路测距 </a></li>
+                </ul>
+            </div>
+            <!--  <div class="panel-body">
+              </div>-->
+            <div id="container"></div>
+
+        </div>
+
+        <!-- end: content -->
+        <div class="copyrights"><a href=""></a></div>
+
+
+        <!-- start: right menu -->
+        <div id="right-menu">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a data-toggle="tab"
+                       href="index.html#right-menu-user">
+                        <span class="fa fa-comment-o fa-2x"></span>
+                    </a>
+                </li>
+                <li>
+                    <a data-toggle="tab"
+                       href="index.html#right-menu-notif">
+                        <span class="fa  fa-anchor fa-2x"></span>
+                    </a>
+
+                </li>
+                <li>
+                    <a data-toggle="tab"
+                       href="index.html#right-menu-config">
+                        <span class="fa fa-user fa-2x"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content">
+            </div>
+        </div>
+        <!-- end: right menu -->
+
+    </div>
+
+    <!-- start: Mobile -->
+    <div id="mimin-mobile" class="reverse">
+        <div class="mimin-mobile-menu-list">
+            <div class="col-md-12 sub-mimin-mobile-menu-list animated fadeInLeft" tabindex="5001"
+                 style="overflow: hidden; outline: none; cursor: -webkit-grab;">
+                <ul class="nav nav-list" id="printMenuMobil">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <button id="mimin-mobile-menu-opener" class="animated rubberBand btn btn-circle btn-danger">
+        <span class="fa fa-bars"></span>
+    </button>
+    <!-- end: Mobile -->
+
+    <!-- start: Javascript -->
+    <script src="./files/jquery.min.js"></script>
+    <script src="./files/jquery.ui.min.js"></script>
+    <script src="./files/bootstrap.min.js"></script>
+    <script src="./files/turf.min.js"></script>
+
+
+    <!-- plugins -->
+    <script src="./files/moment.min.js"></script>
+    <!--  <script src="./files/fullcalendar.min.js"></script>-->
+    <script src="./files/jquery.nicescroll.js"></script>
+
+    <script src="openlayers/ol.js" type="text/javascript"></script>
+
+    <!-- custom -->
+    <script src="./files/main.js"></script>
+    <div id="ascrail2000" class="nicescroll-rails"
+         style="width: 7px; z-index: 222; cursor: default; position: fixed; top: 0px; left: 223px; height: 150px; opacity: 0;">
+        <div style="position: relative; top: 0px; float: right; width: 5px; height: 169px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div>
+    </div>
+    <div id="ascrail2000-hr" class="nicescroll-rails"
+         style="height: 7px; z-index: 222; top: 143px; left: 0px; position: fixed; cursor: default; width: 223px; opacity: 0; display: none;">
+        <div style="position: relative; top: 0px; height: 5px; width: 230px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px; left: 0px;"></div>
+    </div>
+    <div id="ascrail2001" class="nicescroll-rails"
+         style="width: 26px; z-index: -1; cursor: -webkit-grab; position: absolute; top: 0px; left: 74px; height: 300px; display: none;">
+        <div style="position: relative; top: 0px; float: right; width: 24px; height: 0px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div>
+    </div>
+    <div id="ascrail2001-hr" class="nicescroll-rails"
+         style="height: 26px; z-index: -1; top: 274px; left: 0px; position: absolute; display: none;">
+        <div style="position: relative; top: 0px; height: 24px; width: 0px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div>
+    </div>
+
+
+    <!--插件-->
+    <script>
+        <!--全局缓存-->
+        var _cache_polygon = [], numeStr = "", _cache_buff = [], _highlightID, _selectGeometry;
+
+
+        function showtree(thiss) {
+            var $this = $(thiss).parent().children('ul.tree');
+            $(".tree").not($this).slideUp(600);
+            $this.toggle(700);
+
+            $(".tree").not($this).parent("li").find(".tree-toggle .left-arrow").removeClass("fa-angle-down").addClass("fa-angle-right");
+            //  $this.parent("li").find(".tree-toggle .left-arrow").toggleClass("fa-angle-right fa-angle-down");
+            $this.parent("li").children("a").find("span").toggleClass("fa-angle-right fa-angle-down");
+        }
+
+        function showtreetree(thiss) {
+            var $this = $(thiss).parent().children('ul.sub-tree');
+            $(".sub-tree").not($this).slideUp(600);
+            $this.toggle(700);
+
+            $(".sub-tree").not($this).parent("li").find(".sub-tree-toggle .left-arrow").removeClass("fa-angle-down").addClass("fa-angle-right");
+            // $this.parent("li").find(".sub-tree-toggle .left-arrow").toggleClass("fa-angle-right fa-angle-down");
+            $this.parent("li").children("a").find("span").toggleClass("fa-angle-right fa-angle-down");
+
+        }
+
+        function showtreetreetree(thiss) {
+            var $this = $(thiss).parent().children('ul.sub-sub-tree');
+            $(".sub-sub-tree").not($this).slideUp(600);
+            $this.toggle(700);
+
+            $(".sub-sub-tree").not($this).parent("li").find(".sub-tree-toggle .left-arrow").removeClass("fa-angle-down").addClass("fa-angle-right");
+            //  $this.parent("li").find(".sub-tree-toggle .left-arrow").toggleClass("fa-angle-right fa-angle-down");
+            $this.parent("li").children("a").find("span").toggleClass("fa-angle-right fa-angle-down");
+        }
+
+
+        window.onload = loadwindow();
+
+        function loadwindow() {
+            var innerHeight = window.innerHeight;
+            $("#container").height(parseInt(innerHeight) - 50);
+        }
+
+        window.onresize = function () {
+            loadwindow()
+        }
+
+        function Loading() {
+            //return false;
+            $("#content").append("<i id='spin'  style='position: absolute;left:" + (window.innerWidth / 2) + "px;top: " + (window.innerHeight / 9) + "px;z-index: 100000;'>" +
+                "<i class='fa fa-spinner fa-pulse fa-1x ' aria-hidden='true'></i> 正在加载中···</i>");
+
+            /*  setTimeout(function () {
+                  $("#spin").remove();
+              }, 500)*/
+            this.close = function () {
+                $("#spin").remove();
+            }
+        }
+
+        /**
+         * 颜色转为RGBA格式
+         * @param {string} opacity 透明度0-1
+         * @author luwenjun 2018年8月9日
+         */
+        String.prototype.colorRgb = function (opacity) {
+            var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+            var sColor = this.toLowerCase();
+            if (sColor && reg.test(sColor)) {
+                if (sColor.length === 4) {
+                    var sColorNew = "#";
+                    for (var i = 1; i < 4; i += 1) {
+                        sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+                    }
+                    sColor = sColorNew;
+                }
+                //处理六位的颜色值
+                var sColorChange = [];
+                for (var i = 1; i < 7; i += 2) {
+                    sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+                }
+                return "RGBA(" + sColorChange.join(",") + "," + opacity + ")";
+            } else {
+                return sColor;
+            }
+        }
+
+    </script>
+
+    <!--地图-->
+    <script>
+        /**
+         * ZINDEX 枚举，总体控制各类型layer层级
+         * @author luwenjun 2018年8月9日
+         */
+        ZINDEX = {
+            draw: 500,
+            marker: 400,
+            line: 300,
+            polygon: 200,
+            layer: 100
+        }
+        /**
+         * 点样式
+         * @author luwenjun 2018年8月9日
+         */
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+                anchor: [0.5, 27],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                opacity: 0.75,
+                src: 'icon/getPointStylePic.png'
+            }))
+        });
+
+        /**
+         * 文字样式
+         * @author luwenjun 2018年8月9日
+         */
+        var textStyle = new ol.style.Style({
+            text: new ol.style.Text({
+                font: "13px Microsoft Yahei",
+                text: "",
+                fill: new ol.style.Fill({
+                    color: "#000"
+                }),
+                offsetX: 0,
+                offsetY: 0,
+                stroke: new ol.style.Stroke({color: "#fff", width: 2}),
+                textAlign: "center",
+                /*   backgroundFill: new ol.style.Fill({
+                       color: "#2196F3"
+                   }),
+                   padding: [4, 8, 4, 8]*/
+            })
+        });
+
+        /**
+         * 多边形样式 {"fillOpacity":"66","fillColor":"#7ec9b1","strokeColor":"#19AC9E","strokeWidth":1
+         * @author luwenjun 2018年8月9日
+         */
+        var polygonStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(126,201,277,0.66)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#19AC9E',
+                width: 2
+            })
+        });
+
+        //地图瓦片
+        var baselayers = [
+            new ol.layer.Tile({
+                projection: "EPSG:3857",
+                source: new ol.source.XYZ({
+                    attributions: ["@ K Y E "],
+                    urls: ['http://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}']
+                    //urls:['http://t1.tianditu.com/DataServer?T=vec_w&x={x}&y={y}&L={z}']
+                    //  urls: ['http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}']
+                })
+            })
+        ];
+
+        //地图初始化
+        var map = new ol.Map({
+            controls: ol.control.defaults().extend([
+                new ol.control.ScaleLine({
+                    units: 'metric'
+                })
+            ]),
+            layers: baselayers,
+            target: 'container',
+            view: new ol.View({
+                // projection: 'EPSG:3857',
+                center: new ol.proj.transform([106, 36], 'EPSG:4326', 'EPSG:3857'),
+                units: 'metric',
+                zoom: 5
+            })
+        });
+
+        //创建popup dom
+        var popup = document.createElement("div");
+        popup.id = 'popup';
+        popup.className = 'ol-popup';
+
+        var closer = document.createElement("a");
+        closer.id = "popup-closer";
+        closer.className = "ol-popup-closer";
+        closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        }
+
+        var content = document.createElement("div");
+        content.id = "popup-content";
+
+        popup.appendChild(closer);
+        popup.appendChild(content);
+
+        /**
+         * popup 弹出文字
+         * @author luwenjun 2018年8月17日
+         */
+        var overlay = new ol.Overlay({
+            element: popup,
+            autoPan: true,
+            offset: [2, -23],
+            autoPanAnimation: {
+                duration: 250
+            }
+        });
+
+        /**
+         * popup 退出按钮
+         * @author luwenjun 2018年8月17日
+         */
+        closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        };
+        map.addOverlay(overlay);
+
+        var select, oldstyle, this_polygon;
+        /**
+         * 图形捕获事件
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol多边形样式
+         * @author luwenjun 2018年8月16日
+         */
+        var changeInteraction = function () {
+            if (select !== null) {
+                map.removeInteraction(select);
+            }
+
+            select = new ol.interaction.Select();
+
+            if (select !== null) {
+                map.addInteraction(select);
+                select.on('select', function (e) {
+                    //取消气泡
+                    $(closer).click();
+                    //取消高亮
+                    if (_highlightID) {
+                        var show = $("a[name='" + _highlightID + "']");
+                        $(show).css({"color": "#918C8C"});
+                        $(show).css("background-color", "#F6F8F8");
+                    }
+                    //高亮
+                    if (e.selected.length > 0) {
+                        e.target.getFeatures().forEach(function (geometry) {
+                            //  console.log(geometry);
+                            if (!geometry.geometryType) {
+                                return false;
+                            }
+
+
+                            var changePolygonStyle = polygonStyle.clone();
+                            changePolygonStyle.getFill().setColor("#CB3434".colorRgb(0.6));
+                            changePolygonStyle.getStroke().setColor("#CB3434".colorRgb(1));
+                            changePolygonStyle.getStroke().setWidth(8);
+
+                            if (geometry.geometryType == "polygon") {
+                                //记录本次样式
+                                oldstyle = geometry.getStyle();
+                                //恢复上个点击图形原有样式
+                                geometry.setStyle(changePolygonStyle);
+                                if (this_polygon) {
+                                    this_polygon.setStyle(oldstyle);
+                                }
+                                this_polygon = geometry;
+                                //view
+                                map.getView().fit(this_polygon.getGeometry().getExtent());
+                            } else if (geometry.geometryType == "point") {
+                                this_polygon = geometry;
+                                //view
+                                var lnglat = new ol.proj.transform([parseFloat(this_polygon.kyeData.x), parseFloat(this_polygon.kyeData.y)], 'EPSG:4326', 'EPSG:3857');
+                                map.getView().setCenter(lnglat);
+                                map.getView().setZoom(12);
+                            }
+
+                        })
+                        //气泡
+                        Popup(this_polygon);
+                        //气泡连接菜单
+                        AutoMenu(this_polygon);
+                        //高亮列表
+                        Highlight(this_polygon.kyeData.id)
+                    }
+
+
+                });
+            }
+        }
+
+        // changeInteraction();
+
+
+        function Highlight(_id) {
+
+            //清空
+            if (_highlightID) {
+                var show = $("a[name='" + _highlightID + "']");
+                $(show).css({"color": "#918C8C"});
+                $(show).css("background-color", "#F6F8F8");
+            }
+            //高亮
+            var _this = $("a[name='" + _id + "']")
+            $(_this).css({"color": "#ffffff"});
+            $(_this).css("background-color", "#2196F3");
+
+            _highlightID = _id;
+
+
+        }
+
+        function AutoMenu(_this) {
+            // console.log(_this)
+            var treeOne, treeTwo;
+            var hashCode = _this.kyeData.layerCode;
+            var hashID = _this.kyeData.id;
+
+            if (_this.geometryType == "point") {
+                //一级菜单展开
+                $("#printMenu").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == hashCode.split("_")[0]) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                        treeOne = div;
+                    }
+                })
+
+                //二级菜单展开
+                $(treeOne).children("ul").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == (hashCode.split("_")[0] + "_" + hashCode.split("_")[1])) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                    }
+                })
+            } else if (_this.geometryType == "polygon") {
+                //一级菜单展开
+                $("#printMenu").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == hashCode.split("_")[0]) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                        treeOne = div;
+                    }
+                })
+
+                //二级菜单展开
+                $(treeOne).children("ul").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == (hashCode.split("_")[0] + "_" + hashCode.split("_")[1])) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                        treeTwo = div;
+                    }
+                })
+
+                //三级菜单展开
+                $(treeTwo).children("ul").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == (hashCode.split("_")[0] + "_" + hashCode.split("_")[1] + "_" + hashCode.split("_")[2]).substring(0, 11)) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                    }
+                    //  console.log(i, div);
+                })
+            }
+
+            window.location.hash = hashID;
+        }
+
+        /**
+         * Popup绘制
+         * @param {object} this_polygon 更具自定义数据展示气泡
+         * @author luwenjun 2018年8月17日
+         */
+        function Popup(_this) {
+            var coordinate, poptext = "";
+            if (!_this.hasOwnProperty("geometryType")) {
+                return false;
+            }
+            if (_this.geometryType == "point") {
+                var lnglat = new ol.proj.transform([parseFloat(_this.kyeData.x), parseFloat(_this.kyeData.y)], 'EPSG:4326', 'EPSG:3857');
+                _this.kyeData.infos.map(function (data) {
+                    if (data.fieldName && data.fieldValue) {
+                        poptext += "<p><b>" + data.fieldName + "</b> " + ((data.fieldValue == undefined) ? "" : data.fieldValue) + "</p>";
+                    }
+                })
+
+                poptext += "<p><b>ID</b> " + _this.kyeData.id + "</p>";
+                coordinate = lnglat;//
+
+            } else if (_this.geometryType == "polygon") {
+                _this.kyeData.infos.map(function (data) {
+                    if (data.fieldName && data.fieldValue) {
+                        poptext += "<p><b>" + data.fieldName + "</b> " + ((data.fieldValue == undefined) ? "" : data.fieldValue) + "</p>";
+                    }
+                })
+
+                poptext += "<p><b>面积</b> " + _this.kyeData.area + "</p>";
+                poptext += "<p><b>ID</b> " + _this.kyeData.id + "</p>";
+
+                //设置坐标展示popup 获取当前坐标 e.mapBrowserEvent.coordinate;
+                coordinate = [_this.kyeData.innerPoint.x, _this.kyeData.innerPoint.y];//
+
+
+            }
+            overlay.setPosition(coordinate);
+            content.innerHTML = poptext;
+
+            //视野缩进
+            /* map.getView().setCenter(coordinate);
+             map.getView().setZoom(12)*/
+        }
+
+
+        /**
+         * 多多边形绘制对象
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol多边形样式
+         * @author luwenjun 2018年8月9日
+         */
+        function MultiPolygon(polygonFeatures) {
+
+            var vectorSource = new ol.source.Vector({
+                features: polygonFeatures
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                zIndex: ZINDEX.polygon
+            });
+
+            map.addLayer(vectorLayer);
+
+            //  map.getView().fit(polygonFeature.getGeometry());
+            return vectorLayer;
+        }
+
+
+        var PolygonVectorLayer;
+
+        /**
+         * 多边形绘制对象
+         * @author luwenjun 2018年8月9日
+         */
+        function Polygon(polygon, style) {
+            //绘制
+            var polygonFeature = new ol.Feature({
+                geometry: new ol.geom.Polygon(polygon)
+            });
+
+            polygonFeature.setStyle(style);
+            var vectorSource = new ol.source.Vector({
+                features: [polygonFeature]
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                zIndex: ZINDEX.polygon,
+                source: vectorSource
+            });
+
+            map.addLayer(vectorLayer);
+            return vectorLayer;
+        }
+
+        /**
+         * label 绘制对象
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol点样式
+         * @author luwenjun 2018年8月9日
+         */
+        function Text(point, style) {
+            var iconFeatureArray = [];
+            for (var i in point) {
+                var iconFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(point[i]),
+                    name: style.text
+                });
+                iconFeature.setStyle(style);
+                iconFeatureArray.push(iconFeature);
+            }
+
+            var vectorSource = new ol.source.Vector({
+                features: iconFeatureArray
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                zIndex: ZINDEX.marker
+            });
+
+            map.addLayer(vectorLayer);
+
+            return vectorLayer;
+        }
+
+        /**
+         * 点绘制对象
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol点样式
+         * @author luwenjun 2018年8月9日
+         */
+
+        function Point(iconFeatureArray) {
+            var vectorSource = new ol.source.Vector({
+                features: iconFeatureArray
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                zIndex: ZINDEX.marker
+            });
+
+            map.addLayer(vectorLayer);
+
+            return vectorLayer;
+        }
+
+        function FitView(kye_coord_arr) {
+            var extent = new ol.extent.boundingExtent(kye_coord_arr);
+            map.getView().fit(extent);
+        }
+    </script>
+
+    <!--业务-->
+    <script>
+        //点部提示详细信息框
+        var _kye_text;
+        //区域提示详细信息框
+        var _kye_polygon = [];
+        //批量绘制层
+        var _kye_overlays = [];
+
+        //缓存tree kye数列表
+        var datas = []
+
+        function loadMenu() {
+
+            var times = 0, files = ['tree', 'kye'], tree_data;
+            files.forEach(function (file) {
+                $.getJSON('./data/' + file + '.json', function (data) {
+                    datas.push({name: file, data: data});
+                    trigger();
+                });
+            });
+
+            function trigger() {
+                times++;
+                if (times === files.length) {
+                    complete()
+                }
+            }
+
+            function complete() {
+                console.log("下载成功")
+
+                datas.map(function (data) {
+                    if (data.name == "tree") {
+                        tree_data = data.data;
+                    }
+                })
+                for (var i in tree_data) {
+                    PrintMenu(tree_data[i]);
+                }
+
+                $("#printMenu").html(numeStr);
+                $("#printMenuMobil").html(numeStr);
+            }
+
+        }
+
+        loadMenu();
+
+        /**
+         * 加载菜单
+         * @author luwenjun 2018年8月9日
+         */
+        function PrintMenu(data) {
+            // console.log(data)
+            if (!data) {
+                console.warn("data 缺失")
+                return false;
+            }
+            var text = [], text_one = [];
+
+            text.push("<li class='ripple'> ");
+            if (data.code == "005") {
+                text.push("<a class='tree-toggle nav-header'  onclick='AjaxXH(this,1)' code='" + data.code + "'  name='" + data.code + "' > ");
+            } else {
+                text.push("<a class='tree-toggle nav-header'  onclick='AjaxXH(this,2) ' code='" + data.code + "' name='" + data.code + "'> ");
+            }
+
+            text.push("<span class='fa-angle-right fa left-arrow'></span>");
+            text.push(data.label);
+            text.push("    </a>");
+
+            if (data.code == "005") {
+                text.push("            <div class='eye_click' onclick='checked_box(this)' flag='0' code='" + data.code + "'><i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i></div> ");
+            } else {
+                text.push("          <div class='eye_click' tooggle='AjaxGet' flag='0' code='" + data.code + "'></div> ");
+            }
+
+            text.push("   <ul class='nav nav-list tree' style='display: none;'>");
+
+            for (var i in data.children) {
+
+                text_one.push("        <li class='ripple'>");
+                if (data.children[i].hasOwnProperty("children") && data.children[i].children.length > 0) {
+                    text_one.push("           <a class='sub-tree-toggle nav-header'  onclick='showtreetree(this);' code='" + data.children[i].code + "'>  ");
+                } else {
+                    text_one.push("           <a class='sub-tree-toggle nav-header'  onclick='showtreetree(this);add_children(this)' flag='0' code='" + data.children[i].code + "' name='" + data.children[i].code + "'>  ");
+                }
+                text_one.push("         <span class='fa-angle-right fa left-arrow'></span> ");
+                text_one.push(data.children[i].label);
+                text_one.push("           </a> ");
+                text_one.push("           <div class='eye_click' onclick='checked_box_button(this)' flag='0'  name='" + data.code + "' code='" + data.children[i].code + "'> ");
+                text_one.push("        <i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i></div>");
+                text_one.push("          <ul class='nav nav-list sub-tree' style='display: none'>");
+
+                var text_two = [];
+                if (data.children[i].hasOwnProperty("children") && data.children[i].children.length > 0) {
+                    //KYE区划加载
+                    for (var s in data.children[i].children) {
+                        text_two.push("                <li  class='ripple'><a class='sub-tree-toggle nav-header'  onclick='PrintTree(this)' tree='0' code='" + data.children[i].children[s].code + "'  name='" + data.children[i].children[s].code + "'>");
+                        text_two.push("                      <span class='fa-angle-right fa left-arrow'></span> " + data.children[i].children[s].label + "</a>");
+                        text_two.push("                      <div class='eye_click'  flag='0' onclick='PrintGroup(this)' code='" + data.children[i].children[s].code + "'><i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i></div> ");
+                        text_two.push("                     <ul class='nav nav-list sub-sub-tree' style='display: none;'></ul>");
+                        text_two.push("               </li>");
+                    }
+                } else {
+                    text_two.push("                <li><i  style='color:indianred;'>loading...</i></li>");
+                }
+                text_one.push(text_two.join(""));
+                text_one.push("            </ul>");
+                text_one.push("        </li>");
+            }
+
+            text.push(text_one.join(""));
+            text.push("    </ul>");
+            text.push("</li>");
+            numeStr += text.join("");
+
+        }
+
+        /**
+         * 根据code 加载相应点部四级详细列表
+         * @param {object} _this 点击事件this对象
+         * @author luwenjun 2018年8月9日
+         */
+        function PrintGroup(_this) {
+            var flag = $(_this).attr("flag");
+            var code = $(_this).attr("code");
+            if (!code) {
+                console.warn("code 缺失！")
+                return false;
+            }
+
+            var new_flag, open_class, close_class
+            if (flag == "0") {
+                new_flag = "1";
+                open_class = "fa-eye fa fa-1x  right-arrow text-right";
+                close_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            } else {
+                new_flag = "0";
+                close_class = "fa-eye fa fa-1x  right-arrow text-right";
+                open_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            }
+            $(_this).attr("flag", new_flag)
+            $(_this).find("i").removeClass(close_class);
+            $(_this).find("i").addClass(open_class);
+
+
+            var viewCoord = [];
+            if (flag == "0") {
+                var code = $(_this).attr("code");
+                var coord = DrawPolygon(code);
+                //console.log(code, coord)
+                viewCoord = coord;
+            } else {
+                for (var i in _kye_overlays) {
+                    if (_kye_overlays[i].code == code) {
+                        map.removeLayer(_kye_overlays[i].layer);
+                    }
+                }
+                _kye_overlays = [];
+            }
+
+            //调整视野
+            if (viewCoord.length > 0) {
+                FitView(viewCoord)
+            }
+        }
+
+        /**
+         * 根据code 打印四级详细列表
+         * @param {object} _this 点击事件this对象
+         * @author luwenjun 2018年8月9日
+         */
+        function PrintTree(_this) {
+            var code = $(_this).attr("code");
+            var text = "";
+
+            var treedata;
+            _cache_polygon.map(function (area) {
+                if (area.code == code.split("_")[0]) {
+                    treedata = area.data;
+                }
+            })
+            if (!treedata) {
+                console.warn("treedata 缺失！")
+                return false;
+            }
+
+            //重置上次缓存
+            _cache_buff = [];
+
+            treedata.dataList.map(function (polygon) {
+                if (polygon.layerCode.substring(0, 11) == code) {//infosName
+                    text += "<li code='" + code + "' onclick='AreaView(this)' title='" + polygon.infosName + "'><a  name='" + polygon.id + "'> <i class='fa fa-map-marker'></i> " + polygon.infosName + "</a></li>";
+
+                    //放置到缓存中，避免下次绘制遍历总数组
+                    _cache_buff.push(polygon);
+                }
+            })
+
+            $(_this).parent().find("ul").html(text);
+            showtreetreetree(_this);
+        }
+
+
+        /**
+         * 整合 延时加载列表
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月9日
+         */
+        function AjaxXH(_this, type) {
+            showtree(_this);
+            if (type == "2") {
+                setTimeout(function () {
+                    AjaxGetPolygon(_this);
+                }, 500)
+            }
+        }
+
+
+        /**
+         * 加载详细区划列表
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月9日
+         */
+        function add_children(_this) {
+            //不在打印
+            if ($(_this).attr("flag") == "1") {
+                return false;
+            }
+            var code_children = $(_this).attr("code");
+            if (!code_children) {
+                console.warn("code缺失")
+                return false;
+            }
+
+            var kye_data;
+            datas.map(function (data) {
+                if (data.name == "kye") {
+                    kye_data = data.data;
+                }
+            })
+            if (!kye_data) {
+                console.warn("kye_data缺失")
+                return false;
+            }
+
+            var text_THREE = "";
+            kye_data.map(function (ii) {
+                if (ii.layerCode == code_children) {
+                    if (!ii.infosName || !ii.layerCode || !ii.x || !ii.y) {
+                        console.warn(ii);
+                        return false;
+                    }
+                    text_THREE += "<li onclick='MarkerView(this)' code='" + ii.layerCode + "' xy='" + ii.x + "," + ii.y + "' title='" + ii.infosName + "' ><a name='" + ii.id + "' >" + ii.infosName + "</a></li>";
+                }
+            });
+
+            $(_this).parent().find("ul").html(text_THREE);
+            $(_this).attr("flag", "1");
+
+        }
+
+
+        /**
+         * 点部点高亮
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月12日
+         */
+        function MarkerView(_this) {
+            //菜单高亮
+            var _id = $(_this).find("a").attr("name");
+            var __name = $(_this).attr("title");
+            var __xy = $(_this).attr("xy");
+
+
+            Highlight(_id);
+
+            if (_kye_text) {
+                map.removeLayer(_kye_text);
+            }
+
+            var style = iconStyle.clone();
+            /*  style.getText().getFill().setColor("#fff".colorRgb("0.8"));
+              style.getText().setFont("16px Microsoft YaHei");
+              style.getText().setText(__name);
+              style.getText().getStroke().setColor("red");
+              style.getText().getStroke().setWidth(0.5);
+              style.getText().setOffsetY(15);
+              style.getText().setBackgroundFill(new ol.style.Stroke({
+                  color: "red".colorRgb("0.8")
+              }));*/
+
+
+            //记录
+            //    var lnglat = new ol.proj.transform([parseFloat(__xy.split(",")[0]), parseFloat(__xy.split(",")[1])], 'EPSG:4326', 'EPSG:3857');
+            //   _kye_text = Text([lnglat], style);
+
+            var kye_data;
+            datas.map(function (data) {
+                if (data.name == "kye") {
+                    kye_data = data.data;
+                }
+            })
+
+            var pop;
+            for (var i in kye_data) {
+                if (kye_data[i].id == _id) {
+                    pop = kye_data[i];
+                    break;
+                }
+            }
+
+            var coordinate = new ol.proj.transform([pop.x, pop.y], 'EPSG:4326', 'EPSG:3857');
+            var iconFeature = new ol.Feature({
+                geometry: new ol.geom.Point(coordinate)
+            });
+            Point([iconFeature])
+
+
+            overlay.setPosition(coordinate);
+
+            var poptext = "";
+            pop.infos.map(function (data) {
+                if (data.fieldName && data.fieldValue) {
+                    poptext += "<p><b>" + data.fieldName + "</b> " + ((data.fieldValue == undefined) ? "" : data.fieldValue) + "</p>";
+                }
+            })
+
+            poptext += "<p><b>ID</b> " + _this.id + "</p>";
+            content.innerHTML = poptext;
+
+
+            //视野
+            map.getView().setCenter(coordinate);
+            map.getView().setZoom(12);
+        }
+
+
+        /**
+         * 多边形高亮
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月15日
+         */
+        function AreaView(_this) {
+
+            //菜单高亮
+            var _id = $(_this).find("a").attr("name");
+            Highlight(_id);
+            //取消气泡
+            $(closer).click();
+            if (this_polygon) {
+                this_polygon.setStyle(oldstyle);
+            }
+            //_cache_buff
+            var title;
+            if ($(_this).attr("title")) {
+                title = $(_this).attr("title");
+            }
+            if (_cache_buff.length == 0) {
+                console.warn("_cache_buff 缺失");
+                return false
+            }
+
+            //每次加载即清空上次加载
+            if (_kye_polygon.length > 0) {
+                for (var i in _kye_polygon) {
+                    map.removeLayer(_kye_polygon[i])
+                }
+            }
+
+
+            var coords = [], _view_coord = [];
+            _cache_buff.map(function (polygon) {
+
+                //外挂数据
+                var myData = {
+                    area: polygon.area,
+                    id: polygon.id,
+                    infos: polygon.infos,
+                    infosName: polygon.infosName,
+                    innerPoint: polygon.innerPoint,
+                    layerCode: polygon.layerCode
+                }
+
+                var polygon_style = polygonStyle.clone();
+                //执行绘制
+                if (polygon.hasOwnProperty("style")) {
+                    var fillopacity = parseFloat(polygon.style.fillOpacity);
+
+                    if (fillopacity > 1) {
+                        fillopacity = fillopacity * 0.01
+                    }
+                    polygon_style.getFill().setColor(polygon.style.fillColor.colorRgb(fillopacity));
+                    polygon_style.getStroke().setColor(polygon.style.strokeColor);
+                    polygon_style.getStroke().setWidth(polygon.style.strokeWidth);
+                }
+
+                if (polygon.infosName == title || !title) {
+                    var coord = [], polygonFeature;
+                    //单个区划边界
+                    if (polygon.region.parts.length == 1) {
+                        for (var i in polygon.region.points) {
+                            var lnglat = [polygon.region.points[i].x, polygon.region.points[i].y];
+                            coord.push(lnglat);
+
+                            _view_coord.push(lnglat)
+                        }
+                        polygonFeature = new ol.Feature({
+                            geometry: new ol.geom.MultiPolygon([[coord]])
+                        });
+
+                    } else {
+                        //多个区划边界
+                        var orderbyCoord;
+                        var _polygon = polygon.region.points.slice(0);//克隆
+                        for (var i = 0; i < polygon.region.parts.length; i++) {
+                            orderbyCoord = _polygon.splice(0, polygon.region.parts[i]);
+                            //强制转换
+                            var newarr = [];
+                            for (var c in orderbyCoord) {
+                                var lnglat = [orderbyCoord[c].x, orderbyCoord[c].y];
+                                newarr.push(lnglat);
+
+                                _view_coord.push(lnglat)
+                            }
+                            coord.push(newarr);
+                        }
+                        polygonFeature = new ol.Feature({
+                            geometry: new ol.geom.MultiPolygon([coord])
+                        });
+
+                    }
+
+                    polygonFeature.setStyle(polygon_style);
+                    polygonFeature.geometryType = "polygon";
+                    polygonFeature.kyeData = myData;
+
+                    coords.push(polygonFeature);
+
+                    //绘制标题
+                    var lnglat = [polygon.innerPoint.x, polygon.innerPoint.y];
+
+                    var _text_style = textStyle.clone();
+                    _text_style.getText().getFill().setColor("red");
+                    _text_style.getText().setFont("14px Microsoft YaHei");
+                    _text_style.getText().setText(polygon.infosName);
+                    _text_style.getText().getStroke().setColor("#000");
+                    _text_style.getText().getStroke().setWidth(0.6);
+
+                    var marker = Text([lnglat], _text_style);
+                    //放入全局缓存
+                    _kye_polygon.push(marker);
+                }
+                //--------------
+            })
+            var vectorLayer = MultiPolygon(coords);
+            _kye_polygon.push(vectorLayer);
+
+            //视野控制
+            FitView(_view_coord);
+        }
+
+
+        /**
+         * 缓存区划数据
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月10日
+         */
+        function AjaxGetPolygon(_this) {
+            var code = $(_this).attr("code");
+            if (!code) {
+                console.warn("code 缺失")
+                return false;
+            }
+
+            //KYE排除
+            if (code == "005") {
+                return false
+            }
+
+            //判断是否拥有缓存
+            if (_cache_polygon.length > 0) {
+                for (var i in _cache_polygon) {
+                    if (_cache_polygon[i].code == code && _cache_polygon[i].data) {
+                        return false;
+                    }
+                }
+            }
+
+            $.ajax({
+                url: "/KYE/data/" + code + ".json",
+                async: true,
+                cache: true,
+                dataType: "json",
+                beforeSend: function () {
+                    // jumpPage();
+                    $("div[tooggle=AjaxGet]").map(function (i, dom) {
+                        if ($(dom).attr("code") == code) {
+                            $(dom).html("<i class='fa fa-spinner fa-pulse fa-1x ' aria-hidden='true'></i>");
+                        }
+                    })
+                },
+                error: function () {
+                    console.warn("请求错误");
+                    return false;
+                },
+                success: function (data) {
+                    $("#spin").remove();
+
+                    //全局赋值
+                    // quhua_data = data;
+                    _cache_polygon.push({code: code, data: data});
+
+                    $("div[tooggle=AjaxGet]").map(function (i, dom) {
+                        if ($(dom).attr("code") == code) {
+                            $(dom).html("<i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i>");
+                            $(dom).attr("onclick", "checked_box(this)")
+                        }
+
+                    })
+                }
+            })
+
+        }
+
+
+        /**
+         * 一级显示层控制
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月10日
+         */
+        function checked_box(_this) {
+            var flag = $(_this).attr("flag");
+            var code = $(_this).attr("code");
+
+            //变更标识与icon
+            var new_flag, open_class, close_class
+            if (flag == "0") {
+                new_flag = "1";
+                open_class = "fa-eye fa fa-1x  right-arrow text-right";
+                close_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            } else {
+                new_flag = "0";
+                close_class = "fa-eye fa fa-1x  right-arrow text-right";
+                open_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            }
+            $(_this).attr("flag", new_flag)
+            $(_this).find("i").removeClass(close_class).addClass(open_class);
+            $(_this).parent().find("ul i").map(function (i, dom) {
+                $(dom).attr("flag", new_flag);
+                $(dom).removeClass(close_class).addClass(open_class);
+            })
+
+            var code_children = [];
+            $("div[name=" + code + "]").map(function (i, div) {
+                if (($("div[name=" + code + "]").length / 2) > i) {
+                    code_children.push($(div).attr("code"))
+                }
+            })
+
+            //总和视野控制
+            var viewCoord = [];
+
+            //清空添加
+            if (flag == "0") {
+                //绘制数据
+                code_children.map(function (code) {
+                    if (code.split("_")[0] == "005") {
+                        var coord = DrawPoint(code, false);
+                        viewCoord = viewCoord.concat(coord)
+                    } else {
+                        var coord = DrawPolygon(code);
+                        viewCoord = viewCoord.concat(coord)
+                    }
+
+                })
+//console.log(viewCoord)
+                //调整视野
+                if (viewCoord.length > 0) {
+                    map.getView().fit(new ol.extent.boundingExtent(viewCoord));
+                }
+
+            } else {
+                for (var i in _kye_overlays) {
+                    map.removeLayer(_kye_overlays[i].layer);
+                }
+                _kye_overlays = [];
+            }
+        }
+
+
+        /**
+         * 二级显示层控制
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月15日
+         */
+        function checked_box_button(_this) {
+            var flag = $(_this).attr("flag");
+            var code = $(_this).attr("code");
+            var name = $(_this).attr("name");
+            if (!code || !name) {
+                console.warn("code | name 缺失！")
+                return false;
+            }
+
+            //变更标识与icon
+            var new_flag, open_class, close_class
+            if (flag == "0") {
+                new_flag = "1";
+                open_class = "fa-eye fa fa-1x  right-arrow text-right";
+                close_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            } else {
+                new_flag = "0";
+                close_class = "fa-eye fa fa-1x  right-arrow text-right";
+                open_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            }
+            $(_this).attr("flag", new_flag)
+            $(_this).find("i").removeClass(close_class).addClass(open_class);
+
+            //查找所有子项
+            $(_this).parent().find("ul").find("i").map(function (i, dom) {
+                //console.log(i,dom);
+                $(dom).attr("flag", new_flag)
+                $(dom).removeClass(close_class);
+                $(dom).addClass(open_class);
+            })
+
+            //总和视野控制
+            var viewCoord = [];
+
+            //绘制数据
+            if (flag == "0") {
+                if (name == "005") {
+                    var coord = DrawPoint(code, true);
+                    viewCoord = viewCoord.concat(coord)
+                } else {
+                    var coord = DrawPolygon(code);
+                    viewCoord = viewCoord.concat(coord)
+                }
+
+                //调整视野
+                if (viewCoord.length > 0) {
+                    map.getView().fit(new ol.extent.boundingExtent(viewCoord));
+                }
+            } else {
+                //清空
+                for (var i in _kye_overlays) {
+                    // if (code == _kye_overlays[i].code) {
+                    map.removeLayer(_kye_overlays[i].layer);
+                    //  }
+                }
+                _kye_overlays = [];
+            }
+        }
+
+        /**
+         * 绘制网点
+         * @param {string} code 编码
+         * @param {boolean} view 是否自适应视野
+         * @return 返回当前数组，用以视野控制
+         * @author luwenjun 2018年8月10日
+         */
+        function DrawPoint(code, view) {
+            if (!code) {
+                console.log("code 缺失");
+                return false;
+            }
+
+            var kye_data;
+            datas.map(function (data) {
+                if (data.name == "kye") {
+                    kye_data = data.data;
+                }
+            })
+
+            if (!kye_data) {
+                console.warn("kye_data缺失")
+                return false;
+            }
+
+            var kye_coord_arr = [];
+
+            //缓存中查找
+            var layer_cache;
+            _kye_overlays.map(function (layer) {
+                if (layer.code == code) {
+                    layer_cache = layer.layer;
+                }
+            });
+
+            if (layer_cache) {
+                map.addLayer(layer_cache);
+            } else {
+
+                var iconFeatureArray = [];
+                kye_data.map(function (ii) {
+                    if (ii.layerCode == code) {
+                        if (ii.infosName || ii.layerCode || ii.x || ii.y) {
+                            var lnglat = new ol.proj.transform([ii.x, ii.y], 'EPSG:4326', 'EPSG:3857');
+                            var iconFeature = new ol.Feature({
+                                geometry: new ol.geom.Point(lnglat)
+                            });
+
+                            //自定义数据入参
+                            var mydata = {
+                                area: ii.area,
+                                id: ii.id,
+                                infos: ii.infos,
+                                infosName: ii.infosName,
+                                x: ii.x,
+                                y: ii.y,
+                                layerCode: ii.layerCode
+                            }
+
+                            iconFeature.kyeData = mydata;
+                            iconFeature.setStyle(iconStyle);
+                            iconFeature.geometryType = "point";
+                            iconFeatureArray.push(iconFeature);
+
+                            kye_coord_arr.push(lnglat);
+                        }
+
+                    }
+                });
+
+                var vectorLayer = Point(iconFeatureArray);
+                _kye_overlays.push({code: code, layer: vectorLayer})
+            }
+
+            //设置视野
+            if (view == true) {
+                if (layer_cache) {
+                    map.getView().fit(layer_cache.getSource().getExtent());
+                } else if (vectorLayer) {
+                    map.getView().fit(vectorLayer.getSource().getExtent());
+                }
+            }
+
+            return kye_coord_arr;
+        }
+
+
+        /**
+         * 绘制区划边界
+         * @param {string} code 编码
+         * @return 返回当前数组，用以视野控制
+         * @author luwenjun 2018年8月10日
+         */
+        function DrawPolygon(code) {
+            if (!code) {
+                console.log("code 缺失");
+                return false;
+            }
+
+            var _view_coord = [];
+
+            //缓存中查找
+            var _cache = false;
+            _kye_overlays.map(function (layer) {
+                if (layer.code == code) {
+                    map.addLayer(layer.layer);
+                    _cache = true;
+                }
+            });
+
+            if (_cache == false) {
+                var _polygon;
+                _cache_polygon.map(function (data) {
+                    //console.log(polygon)
+                    if (data.code == code.split("_")[0]) {
+                        _polygon = data.data.dataList;
+                    }
+                })
+                var coords = []
+                _polygon.map(function (polygon) {
+                    //自定义数据入参
+                    var myData = {
+                        area: polygon.area,
+                        id: polygon.id,
+                        infos: polygon.infos,
+                        infosName: polygon.infosName,
+                        innerPoint: polygon.innerPoint,
+                        layerCode: polygon.layerCode
+                    }
+                    var _polygon_style = polygonStyle.clone();
+                    //样式
+                    if (polygon.hasOwnProperty("style")) {
+                        var fillopacity = parseFloat(polygon.style.fillOpacity);
+
+                        if (fillopacity > 1) {
+                            fillopacity = fillopacity * 0.01
+                        }
+                        _polygon_style.getFill().setColor(polygon.style.fillColor.colorRgb(fillopacity));
+                        _polygon_style.getStroke().setColor(polygon.style.strokeColor);
+                        _polygon_style.getStroke().setWidth(polygon.style.strokeWidth);
+                    }
+
+                    var flag;
+                    if (code == polygon.layerCode.substring(0, 7)) {
+                        //一级与二级eye按钮显示条件
+                        flag = true;
+                    } else if (code == polygon.layerCode) {
+                        //三级eye 按钮显示条件
+                        flag = true;
+                    } else if (code == polygon.layerCode.substring(0, 11)) {
+                        //应为广东省code特殊，细化了code编码，增加判断
+                        flag = true;
+                    }
+
+                    if (flag == true) {
+                        var coord = [], polygonFeature;
+                        //单个区划边界
+                        if (polygon.region.parts.length == 1) {
+                            for (var i in polygon.region.points) {
+                                var lnglat = [polygon.region.points[i].x, polygon.region.points[i].y];
+                                coord.push(lnglat);
+
+                                _view_coord.push(lnglat)
+                            }
+                            polygonFeature = new ol.Feature({
+                                geometry: new ol.geom.MultiPolygon([[coord]])
+                            });
+
+                        } else {
+                            //多个区划边界
+                            var orderbyCoord;
+                            var _polygon = polygon.region.points.slice(0);//克隆
+                            for (var i = 0; i < polygon.region.parts.length; i++) {
+                                orderbyCoord = _polygon.splice(0, polygon.region.parts[i]);
+                                //强制转换
+                                var newarr = [];
+                                for (var c in orderbyCoord) {
+                                    var lnglat = [orderbyCoord[c].x, orderbyCoord[c].y];
+                                    newarr.push(lnglat);
+
+                                    _view_coord.push(lnglat)
+                                }
+                                coord.push(newarr);
+                            }
+                            polygonFeature = new ol.Feature({
+                                geometry: new ol.geom.MultiPolygon([coord])
+                            });
+
+                        }
+
+                        polygonFeature.setStyle(_polygon_style);
+                        polygonFeature.geometryType = "polygon";
+                        polygonFeature.kyeData = myData;
+
+                        coords.push(polygonFeature);
+
+                        //绘制标题
+                        var lnglat = [polygon.innerPoint.x, polygon.innerPoint.y];
+
+                        var _text_style = textStyle.clone();
+                        _text_style.getText().getFill().setColor("red");
+                        _text_style.getText().setFont("14px Microsoft YaHei");
+                        _text_style.getText().setText(polygon.infosName);
+                        _text_style.getText().getStroke().setColor("#000");
+                        _text_style.getText().getStroke().setWidth(0.6);
+
+                        var marker = Text([lnglat], _text_style);
+                        //放入全局缓存
+                        _kye_overlays.push({code: code, layer: marker});
+                    }
+                })
+
+                var vectorLayer = MultiPolygon(coords);
+                //放入全局缓存
+                _kye_overlays.push({code: code, layer: vectorLayer});
+            }
+
+            return _view_coord;
+        }
+
+
+        //Demo数据加载
+        (function () {
+            var style = polygonStyle.clone();
+            var polygon1 = [
+                [122.801742, 45.48565],
+                [122.801742, 45.60491],
+                [122.584762, 45.60491],
+                [122.584762, 45.48565],
+                [122.801742, 45.48565]
+            ];
+            var polygon2 = [
+                [122.520217, 45.535693],
+                [122.64038, 45.553967],
+                [122.720031, 45.526554],
+                [122.669906, 45.507309],
+                [122.723464, 45.446643],
+                [122.532577, 45.408574],
+                [122.487258, 45.477466],
+                [122.520217, 45.535693]
+            ]
+            var p1 = [], p2 = [];
+            polygon1.map(function (p) {
+                p1.push(ol.proj.transform([p[0], p[1]], 'EPSG:4326', 'EPSG:3857'))
+            })
+            polygon2.map(function (p) {
+                p2.push(ol.proj.transform([p[0], p[1]], 'EPSG:4326', 'EPSG:3857'))
+            })
+            PolygonVectorLayer = Polygon([p1], style);
+
+            var value = PolygonClipPolygon([polygon1], [polygon2]);
+
+            var valueNew = [], valueNN = [];
+            value.map(function (p) {
+                p.map(function (pp) {
+                    valueNew.push(ol.proj.transform([parseFloat(pp[0]), parseFloat(pp[1])], 'EPSG:4326', 'EPSG:3857'));
+                })
+                valueNN.push(valueNew)
+            })
+
+            //   Polygon(valueNN, style);
+
+
+            FitView(p1.concat(p2));
+        })()
+
+
+        var image = new ol.style.Circle({
+            radius: 5,
+            fill: null,
+            stroke: new ol.style.Stroke({color: 'red', width: 1})
+        });
+
+
+        var styles = {
+            'Point': new ol.style.Style({
+                image: image
+            }),
+            'LineString': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'green',
+                    width: 1
+                })
+            }),
+            'MultiLineString': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'green',
+                    width: 1
+                })
+            }),
+            'MultiPoint': new ol.style.Style({
+                image: image
+            }),
+            'MultiPolygon': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'yellow',
+                    width: 1
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255, 255, 0, 0.1)'
+                })
+            }),
+            'Polygon': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'blue',
+                    lineDash: [4],
+                    width: 3
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(0, 0, 255, 0.1)'
+                })
+            }),
+            'GeometryCollection': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'magenta',
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: 'magenta'
+                }),
+                image: new ol.style.Circle({
+                    radius: 10,
+                    fill: null,
+                    stroke: new ol.style.Stroke({
+                        color: 'magenta'
+                    })
+                })
+            }),
+            'Circle': new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: 'red',
+                    width: 2
+                }),
+                fill: new ol.style.Fill({
+                    color: 'rgba(255,0,0,0.2)'
+                })
+            })
+        };
+
+        var styleFunction = function (feature) {
+            return styles[feature.getGeometry().getType()];
+        };
+
+        /**
+         * 多边形剪切多边形
+         * @param {array} p1 多边形边界坐标组
+         * @param {array} p2 多边形边界坐标组
+         * @return 返回此两个多边形的交集图形边界数组
+         * @author luwenjun 2018年8月25日
+         */
+        function PolygonClipPolygon(p1, p2) {
+            if (!p1 || !p2) {
+                console.warn(p1 + "|" + p2 + "参数传输错误")
+                return false;
+            }
+            var poly1 = turf.polygon(p1);
+            var poly2 = turf.polygon(p2);
+
+            var intersection = new turf.intersect(poly1, poly2);
+            if (!intersection) {
+                console.warn("异常")
+                return false;
+            }
+
+            var array = [];
+            if (intersection.type == "Feature") {
+                array = intersection.geometry.coordinates;
+            }
+            return array;
+        }
+
+        /**
+         * PolygonUnionPolygon 多边形合并
+         * @param {array} polygons 多个多边形边界数组
+         * @return 返回多个多边形合并为一个多边形的边界数组
+         * @author luwenjun 2018年8月25日
+         */
+        function UnionPolygon(polygons) {
+            if (!polygons) {
+                console.warn("polygons 参数传输错误");
+                return false;
+            }
+
+            var polygon = polygons[0];
+            for (var i = 0; i < polygons.length; i++) {
+                polygon = turf.union(polygon, polygons[i]);
+            }
+
+            var array = [];
+            if (polygon.type == "Feature") {
+                array = intersection.geometry.coordinates;
+            }
+            return array;
+        }
+
+        /**
+         * 线分割面
+         * 面类型只能是polygon 但可以是环
+         * 注:线与多边形必须有两个交点
+         */
+        /**
+         * 线分割面
+         * @param {array} polygons 多个多边形边界数组
+         * @return 返回多个多边形合并为一个多边形的边界数组
+         * @author luwenjun 2018年8月25日
+         */
+        function PolygonClipByLine(polygon, clipLine) {
+            if (polygon.geometry.type === 'Polygon') {
+                var polyLine = turf.polygonToLine(polygon)
+                if (polyLine.geometry.type === 'LineString') { // 切割普通多边形
+                    return _singlePolygonClip(polyLine, clipLine);
+                } else if (polyLine.geometry.type === 'MultiLineString') { //切割环
+                    return _multiPolygonClip(polyLine, clipLine);
+                }
+            } else if (polygon.geometry.type === 'MultiPolygon') {
+                // 若输入的多边形类型为Multipolygon则拆分成多个Polygon
+                var polygons = _multiPolygon2polygons(polygon)
+                var clipPolygon = null;
+                var clipPolygonIndex = -1
+                // 获取MultiPolygon中与切割线相交的多边形（有且只能有一个多边形相交2个交点）
+                polygons.forEach(function (polygon, index) {
+                    var polyLine = turf.polygonToLine(polygon)
+                    if (turf.lineIntersect(polyLine, clipLine).features.length === 2) {
+                        if (!clipPolygon) {
+                            clipPolygon = polygon
+                            clipPolygonIndex = index
+                        } else {
+                            console.warn('裁剪失败:MultiPolygon只能有一个多边形与切割线存在交点')
+                        }
+                    }
+                })
+                if (clipPolygonIndex !== -1) {
+                    polygons.splice(clipPolygonIndex, 1)
+                    return turf.featureCollection(polygons.concat(PolygonClipByLine(clipPolygon, clipLine).features));
+                } else {
+                    console.warn('裁剪失败:MultiPolygon与切割线无交点')
+                }
+
+            } else {
+                console.warn('裁剪失败:输入的多边形类型为错误')
+            }
+        }
+
+        /**
+         * 折线剪切多边形
+         * @param {geoJson} polyLine 被裁切多边形
+         * @param {geoJson} clipLine 裁切线条
+         * @param {geoJson} clipLine 裁切线条
+         * @return 返回折线分割的两个多边形边界坐标数组
+         * @author luwenjun 2018年8月25日
+         */
+        function _singlePolygonClip(polyLine, clipLine) {
+            // 获得裁切点
+            var intersects = turf.lineIntersect(polyLine, clipLine);
+            if (intersects.features.length !== 2) {
+                throw {state: '裁剪失败', message: '切割线与多边形交点应该为2个,当前交点个数为' + intersects.features.length};
+            }
+            // 检查切割线与多边形的位置关系 （切割线的起点和终点不能落在多边形内部）
+            var clipLineLength = clipLine.geometry.coordinates.length;
+            var clipLineStartPoint = turf.point(clipLine.geometry.coordinates[0])
+            var clipLineEndPoint = turf.point(clipLine.geometry.coordinates[clipLineLength - 1])
+            var polygon = turf.polygon([polyLine.geometry.coordinates])
+            if (turf.booleanPointInPolygon(clipLineStartPoint, polygon) || turf.booleanPointInPolygon(clipLineEndPoint, polygon)) {
+                throw {state: '裁剪失败', message: '切割线起点或终点不能在 裁剪多边形内部'};
+            }
+            // 通过裁切点 分割多边形（只能获得多边形的一部分）
+            var slicedPolyLine = turf.lineSlice(intersects.features[0], intersects.features[1], polyLine);
+            // 裁剪线分割 保留多边形内部部分
+            var slicedClipLine = turf.lineSlice(intersects.features[0], intersects.features[1], clipLine);
+            // 重新拼接多边形 存在 对接的问题 所以先进行判断 如何对接裁剪的多边形和裁剪线
+            var resultPolyline1 = _connectLine(slicedPolyLine, slicedClipLine)
+            // 闭合线 来构造多边形
+            resultPolyline1.geometry.coordinates.push(resultPolyline1.geometry.coordinates[0])
+            var resultPolygon1 = turf.lineToPolygon(resultPolyline1);
+            // 构造切割的另一面多边形
+            var firstPointOnLine = _isOnLine(turf.point(polyLine.geometry.coordinates[0]), slicedPolyLine);
+            var pointList = [];
+            var pointList = [];
+            if (firstPointOnLine) {
+                for (var i = 0; i < polyLine.geometry.coordinates.length; i++) {
+                    var coordinate = polyLine.geometry.coordinates[i];
+                    if (!_isOnLine(turf.point(coordinate), slicedPolyLine)) {
+                        pointList.push(coordinate)
+                    }
+                }
+
+            } else {
+                var skipNum = 0; // 记录前面被跳过的点的个数
+                var isStartPush = false;
+                for (var i = 0; i < polyLine.geometry.coordinates.length; i++) {
+                    var coordinate = polyLine.geometry.coordinates[i];
+                    if (!_isOnLine(turf.point(coordinate), slicedPolyLine)) {
+                        if (isStartPush) {
+                            pointList.push(coordinate)
+                        } else {
+                            skipNum++
+                        }
+
+                    } else {
+                        isStartPush = true;
+                    }
+                }
+
+                // 将前面跳过的点补充到 点数组中
+                for (var i = 0; i < skipNum; i++) {
+                    pointList.push(polyLine.geometry.coordinates[i])
+                }
+            }
+            var slicedPolyLine_2 = turf.lineString(pointList);
+            var resultPolyline2 = _connectLine(slicedPolyLine_2, slicedClipLine)
+            // 闭合线 来构造多边形
+            resultPolyline2.geometry.coordinates.push(resultPolyline2.geometry.coordinates[0])
+            var resultPolygon2 = turf.lineToPolygon(resultPolyline2);
+            // 返回面要素集
+            return turf.featureCollection([
+                resultPolygon1,
+                resultPolygon2
+            ]);
+        }
+
+        /**
+         * 折线剪切环多边形
+         * @param {geoJson} polyLine 被裁切多边形
+         * @param {geoJson} clipLine 裁切线条
+         * @return 返回折线分割的两个多边形边界坐标数组
+         * @author luwenjun 2018年8月25日
+         */
+        function _multiPolygonClip(polyLine, clipLine) {
+            // 将环 多边形分割成 内部逆时针多边形+外部多边形
+            var outPolyline, insidePolylineList = [];
+            for (var i = 0; i < polyLine.geometry.coordinates.length; i++) {
+                var splitPolyline = turf.lineString(polyLine.geometry.coordinates[i]);
+                if (turf.booleanClockwise(splitPolyline)) {
+                    if (outPolyline) {
+                        throw {state: '裁剪失败', message: '出现了两个外部多边形无法处理'};
+                    } else {
+                        outPolyline = splitPolyline
+                    }
+                } else {
+                    var intersects = turf.lineIntersect(splitPolyline, clipLine);
+                    if (intersects.features.length > 0) {
+                        throw {state: '裁剪失败', message: '切割线不能与内环有交点'};
+                    }
+                    insidePolylineList.push(splitPolyline)
+                }
+            }
+            var resultCollection = _singlePolygonClip(outPolyline, clipLine)
+
+            for (var i = 0; i < resultCollection.features.length; i++) {
+                for (var j = 0; j < insidePolylineList.length; j++) {
+                    var startPoint = turf.point(insidePolylineList[j].geometry.coordinates[0]);
+                    if (turf.booleanPointInPolygon(startPoint, resultCollection.features[i])) {
+                        resultCollection.features[i] = turf.mask(resultCollection.features[i], turf.lineToPolygon(insidePolylineList[j]));
+                    }
+                }
+            }
+            return resultCollection;
+        }
+
+        function PolygonClipPolygon(p1, p2) {
+            if (!p1 || !p2) {
+                console.warn("参数传输错误")
+                return false;
+            }
+            var poly1 = turf.polygon(p1);
+            var poly2 = turf.polygon(p2);
+            //  console.log(poly1)
+            var intersection = new turf.intersect(poly1, poly2);
+            if (!intersection) {
+                console.warn("异常")
+                return false;
+            }
+
+            var array = [];
+            if (intersection.type == "Feature") {
+                array = intersection.geometry.coordinates;
+            }
+            return array;
+        }
+
+        var drawInteraction;//存放绘制实例
+        var selectInteraction;//捕获实例
+        var DarwLayer;//绘制图层
+
+        function lineclippolygon(_thismap) {
+            //清空历史选中功能
+            if (selectInteraction !== null) {
+                map.removeInteraction(selectInteraction);
+            }
+            selectInteraction = new ol.interaction.Select();
+            map.addInteraction(selectInteraction);
+
+            selectInteraction.on("select", function (e) {
+                var geometry;
+                e.target.getFeatures().forEach(function (g) {
+                    //判断是否选中图形要切割
+                    if (!g) {
+                        alert("请选中要裁切的图形。");
+                        return false;
+                    } else {
+                        //绘制并开始裁切
+                        geometry = g;
+                    }
+                });
+
+                //改变光标开启绘制
+                document.body.style.cursor = "crosshair";
+
+                geometry.xxxx = "手绘线条";
+                _drawClip(geometry);
+            })
+        }
+
+        function _drawClip(selectGeometry) {
+            map.removeInteraction(selectInteraction);
+
+            var source = new ol.source.Vector({wrapX: false})
+            var vector = new ol.layer.Vector({
+                zIndex: ZINDEX.draw,
+                source: source
+            });
+            map.addLayer(vector);
+            //缓存绘制图层
+            DarwLayer = vector;
+
+            drawInteraction = new ol.interaction.Draw({
+                source: source,
+                type: 'LineString',
+                style: new ol.style.Style({
+                    stroke: new ol.style.Stroke({
+                        color: 'rgba(255, 0, 0, 0.5)',
+                        width: 2,
+                        lineDash: [4, 5]
+                    }),
+                })
+            });
+            map.addInteraction(drawInteraction);
+
+            drawInteraction.on("drawend", function (draw) {
+                switch (draw.feature.getGeometry().getType()) {
+                    case  "Point":
+                        break;
+                    case  "LineString":
+                        //格式化geojson
+                        var geo = new ol.format.GeoJSON();
+
+                        //切割
+                        var line = geo.writeFeatureObject(draw.feature);
+                        var polygon = geo.writeFeatureObject(selectGeometry);
+
+                        //3857转4326
+                        line = turf.toWgs84(line)
+                        polygon = turf.toWgs84(polygon)
+
+                        //裁剪
+                        var backPolygon = PolygonClipByLine(polygon, line);
+
+                        //读取裁剪结束的geojson到feature中
+                        var features = (new ol.format.GeoJSON()).readFeatures(turf.toMercator(backPolygon));
+                        features.map(function (feature) {
+                            feature.setStyle(selectGeometry.getStyle());
+                        })
+
+                        // Polygon(features, selectGeometry.getStyle())
+                        var vectorSource = new ol.source.Vector({
+                            features: features
+                        });
+
+                        var vectorLayer = new ol.layer.Vector({
+                            source: vectorSource,
+                            style: styleFunction,
+                            zIndex: ZINDEX.draw
+                        });
+
+                        map.addLayer(vectorLayer);
+
+                        //多边形层中删除切割前的图形
+                        PolygonVectorLayer.getSource().removeFeature(selectGeometry);
+                        //保存上一次的裁剪结果
+                        PolygonVectorLayer = vectorLayer;
+                        //删除绘制线
+                        map.removeLayer(DarwLayer);
+
+                        //关闭绘制
+                        drawInteraction.finishDrawing();
+                        map.removeInteraction(drawInteraction);
+
+                        //改变光标开启绘制
+                        document.body.style.cursor = "auto";
+
+                        break;
+                    case  "Circle":
+                        break;
+                    case  "Polygon":
+                        //格式化geojson
+                        var geo = new ol.format.GeoJSON();
+
+                        //切割
+                        var line = geo.writeFeatureObject(draw.feature);
+                        var polygon = geo.writeFeatureObject(selectGeometry);
+
+                        //3857转4326
+                        line = turf.toWgs84(line)
+                        polygon = turf.toWgs84(polygon)
+
+                        //裁剪
+                        var backPolygon = PolygonClipByLine(polygon, line);
+
+                        //读取裁剪结束的geojson到feature中
+                        var features = (new ol.format.GeoJSON()).readFeatures(turf.toMercator(backPolygon));
+                        features.map(function (feature) {
+                            feature.setStyle(selectGeometry.getStyle());
+                        })
+
+                        // Polygon(features, selectGeometry.getStyle())
+                        var vectorSource = new ol.source.Vector({
+                            features: features
+                        });
+
+                        var vectorLayer = new ol.layer.Vector({
+                            source: vectorSource,
+                            style: styleFunction,
+                            zIndex: ZINDEX.draw
+                        });
+
+                        map.addLayer(vectorLayer);
+
+                        //多边形层中删除切割前的图形
+                        PolygonVectorLayer.getSource().removeFeature(selectGeometry);
+                        //保存上一次的裁剪结果
+                        PolygonVectorLayer = vectorLayer;
+                        //删除绘制线
+                        map.removeLayer(DarwLayer);
+
+                        //关闭绘制
+                        drawInteraction.finishDrawing();
+                        map.removeInteraction(drawInteraction);
+
+                        //改变光标开启绘制
+                        document.body.style.cursor = "auto";
+
+                        break;
+                    case  "Square":
+                        break;
+                }
+
+            })
+        }
+
+        /**
+         * 连接两条线
+         * 方法会将两条线段最近的一段直接连接
+         */
+        function _connectLine(line1, line2) {
+            var line2_length = line2.geometry.coordinates.length;
+            var line1_startPoint = line1.geometry.coordinates[0]
+            var line2_startPoint = line2.geometry.coordinates[0]
+            var line2_endPoint = line2.geometry.coordinates[line2_length - 1]
+            var pointList = [];
+            // 获取line1 所有点坐标
+            for (var i = 0; i < line1.geometry.coordinates.length; i++) {
+                var coordinate = line1.geometry.coordinates[i];
+                pointList.push(coordinate)
+            }
+
+
+            // 判断两条线的 起点是否接近，如果接近 逆转line2线 进行连接
+            if (turf.distance(line1_startPoint, line2_startPoint) < turf.distance(line1_startPoint, line2_endPoint)) {
+                line2.geometry.coordinates = line2.geometry.coordinates.reverse();
+            }
+            for (var i = 0; i < line2.geometry.coordinates.length; i++) {
+                var coordinate = line2.geometry.coordinates[i];
+                pointList.push(coordinate)
+            }
+            return turf.lineString(pointList);
+        }
+
+        /**
+         * 判断点是否在线里面
+         * 注：线组成的坐标对比
+         */
+        function _isOnLine(point, line) {
+            for (var i = 0; i < line.geometry.coordinates.length; i++) {
+                var coordinate = line.geometry.coordinates[i];
+                if (point.geometry.coordinates[0] === coordinate[0] && point.geometry.coordinates[1] === coordinate[1]) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+    </script>
+
+    <div class="jqvmap-label" style="display: none; left: 771px; top: 1966px;">Russian Federation</div>
+    <!-- end: Javascript -->
+
+</body>
+
+</html>

@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta charset="UTF-8">
+    <title>点部区划</title>
+    <!-- start: Css -->
+    <link rel="stylesheet" href="openlayers/ol.css" type="text/css">
+    <link rel="stylesheet" type="text/css" href="files/bootstrap.min.css">
+    <!-- plugins -->
+    <link rel="stylesheet" type="text/css" href="files/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="files/animate.min.css">
+    <link rel="stylesheet" href="files/style.css">
+    <!-- end: Css -->
+
+    <link rel="shortcut icon" href="TY.ico">
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+    <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+    <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+    <style>
+        html, body {
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            overflow-y: hidden;
+        }
+
+        #container {
+
+            width: 100%;
+            height: 0px;
+
+        }
+
+        #spin {
+            background-color: #2196F3;
+            border-radius: 3px;
+            padding: 4px 8px;
+            color: white;
+            font-size: 13px;
+            box-shadow: #cccccc 2px 2px 2px;
+        }
+
+        .eye_click {
+            position: absolute;
+            right: 0px;
+            top: 0px;
+            z-index: 1000;
+            /* border: 1px solid red;*/
+            padding: 5px 20px 15px 20px;
+            text-shadow: #cccccc 1px 1px 1px;
+            color: #918C8C;
+        }
+
+    </style>
+
+</head>
+<body id="mimin" class="dashboard">
+<!-- start: Header -->
+<nav class="navbar navbar-default header navbar-fixed-top">
+    <div class="col-md-12 nav-wrapper">
+        <div class="navbar-header" style="width:100%;">
+            <div class="opener-left-menu is-open">
+                <span class="top"></span>
+                <span class="middle"></span>
+                <span class="bottom"></span>
+            </div>
+            <a href="index.aspx" title="地图服务" class="navbar-brand">
+                <b> KYE</b>
+            </a>
+        </div>
+    </div>
+</nav>
+<!-- end: Header -->
+<div class="container-fluid mimin-wrapper">
+    <!-- start:Left Menu -->
+
+    <div id="left-menu">
+        <div class="sub-left-menu scroll" tabindex="5000" style="overflow: hidden; outline: none;">
+            <ul class="nav nav-list" id="printMenu">
+            </ul>
+        </div>
+    </div>
+    <!-- end: Left Menu -->
+
+
+    <!-- start: content -->
+    <div id="content">
+        <!-- <div style="padding:5px 0 0 0;">
+
+         </div>-->
+        <!-- <iframe id='divis' style='width: 100%;margin: 0;padding: 0;display: none' src='' frameborder='0'></iframe>-->
+        <div class="panel" id="rightContent">
+            <!--  <div class="panel-body">
+              </div>-->
+            <div id="container"></div>
+
+        </div>
+        <!-- end: content -->
+        <div class="copyrights"><a href=""></a></div>
+
+
+        <!-- start: right menu -->
+        <div id="right-menu">
+            <ul class="nav nav-tabs">
+                <li class="active">
+                    <a data-toggle="tab"
+                       href="index.html#right-menu-user">
+                        <span class="fa fa-comment-o fa-2x"></span>
+                    </a>
+                </li>
+                <li>
+                    <a data-toggle="tab"
+                       href="index.html#right-menu-notif">
+                        <span class="fa  fa-anchor fa-2x"></span>
+                    </a>
+
+                </li>
+                <li>
+                    <a data-toggle="tab"
+                       href="index.html#right-menu-config">
+                        <span class="fa fa-user fa-2x"></span>
+                    </a>
+                </li>
+            </ul>
+            <div class="tab-content">
+            </div>
+        </div>
+        <!-- end: right menu -->
+
+    </div>
+
+    <!-- start: Mobile -->
+    <div id="mimin-mobile" class="reverse">
+        <div class="mimin-mobile-menu-list">
+            <div class="col-md-12 sub-mimin-mobile-menu-list animated fadeInLeft" tabindex="5001"
+                 style="overflow: hidden; outline: none; cursor: -webkit-grab;">
+                <ul class="nav nav-list" id="printMenuMobil">
+
+                </ul>
+            </div>
+        </div>
+    </div>
+    <button id="mimin-mobile-menu-opener" class="animated rubberBand btn btn-circle btn-danger">
+        <span class="fa fa-bars"></span>
+    </button>
+    <!-- end: Mobile -->
+
+    <!-- start: Javascript -->
+    <script src="./files/jquery.min.js"></script>
+    <script src="./files/jquery.ui.min.js"></script>
+    <script src="./files/bootstrap.min.js"></script>
+
+
+    <!-- plugins -->
+    <script src="./files/moment.min.js"></script>
+    <!--  <script src="./files/fullcalendar.min.js"></script>-->
+    <script src="./files/jquery.nicescroll.js"></script>
+
+    <script src="openlayers/ol.js" type="text/javascript"></script>
+
+    <!-- custom -->
+    <script src="./files/main.js"></script>
+    <div id="ascrail2000" class="nicescroll-rails"
+         style="width: 7px; z-index: 222; cursor: default; position: fixed; top: 0px; left: 223px; height: 150px; opacity: 0;">
+        <div style="position: relative; top: 0px; float: right; width: 5px; height: 169px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div>
+    </div>
+    <div id="ascrail2000-hr" class="nicescroll-rails"
+         style="height: 7px; z-index: 222; top: 143px; left: 0px; position: fixed; cursor: default; width: 223px; opacity: 0; display: none;">
+        <div style="position: relative; top: 0px; height: 5px; width: 230px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px; left: 0px;"></div>
+    </div>
+    <div id="ascrail2001" class="nicescroll-rails"
+         style="width: 26px; z-index: -1; cursor: -webkit-grab; position: absolute; top: 0px; left: 74px; height: 300px; display: none;">
+        <div style="position: relative; top: 0px; float: right; width: 24px; height: 0px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div>
+    </div>
+    <div id="ascrail2001-hr" class="nicescroll-rails"
+         style="height: 26px; z-index: -1; top: 274px; left: 0px; position: absolute; display: none;">
+        <div style="position: relative; top: 0px; height: 24px; width: 0px; background-color: rgb(33, 150, 243); border: 1px solid rgb(255, 255, 255); background-clip: padding-box; border-radius: 5px;"></div>
+    </div>
+
+
+    <!--插件-->
+    <script>
+        <!--全局缓存-->
+        var _cache_polygon = [], numeStr = "", _cache_buff = [];
+
+
+        function showtree(thiss) {
+            var $this = $(thiss).parent().children('ul.tree');
+            $(".tree").not($this).slideUp(600);
+            $this.toggle(700);
+
+            $(".tree").not($this).parent("li").find(".tree-toggle .left-arrow").removeClass("fa-angle-down").addClass("fa-angle-right");
+            //  $this.parent("li").find(".tree-toggle .left-arrow").toggleClass("fa-angle-right fa-angle-down");
+            $this.parent("li").children("a").find("span").toggleClass("fa-angle-right fa-angle-down");
+        }
+
+        function showtreetree(thiss) {
+            var $this = $(thiss).parent().children('ul.sub-tree');
+            $(".sub-tree").not($this).slideUp(600);
+            $this.toggle(700);
+
+            $(".sub-tree").not($this).parent("li").find(".sub-tree-toggle .left-arrow").removeClass("fa-angle-down").addClass("fa-angle-right");
+            // $this.parent("li").find(".sub-tree-toggle .left-arrow").toggleClass("fa-angle-right fa-angle-down");
+            $this.parent("li").children("a").find("span").toggleClass("fa-angle-right fa-angle-down");
+
+        }
+
+        function showtreetreetree(thiss) {
+            var $this = $(thiss).parent().children('ul.sub-sub-tree');
+            $(".sub-sub-tree").not($this).slideUp(600);
+            $this.toggle(700);
+
+            $(".sub-sub-tree").not($this).parent("li").find(".sub-tree-toggle .left-arrow").removeClass("fa-angle-down").addClass("fa-angle-right");
+            //  $this.parent("li").find(".sub-tree-toggle .left-arrow").toggleClass("fa-angle-right fa-angle-down");
+            $this.parent("li").children("a").find("span").toggleClass("fa-angle-right fa-angle-down");
+        }
+
+
+        window.onload = loadwindow();
+
+        function loadwindow() {
+            var innerHeight = window.innerHeight;
+            $("#container").height(parseInt(innerHeight) - 50);
+        }
+
+        window.onresize = function () {
+            loadwindow()
+        }
+
+        function Loading() {
+            //return false;
+            $("#content").append("<i id='spin'  style='position: absolute;left:" + (window.innerWidth / 2) + "px;top: " + (window.innerHeight / 9) + "px;z-index: 100000;'>" +
+                "<i class='fa fa-spinner fa-pulse fa-1x ' aria-hidden='true'></i> 正在加载中···</i>");
+
+            /*  setTimeout(function () {
+                  $("#spin").remove();
+              }, 500)*/
+            this.close = function () {
+                $("#spin").remove();
+            }
+        }
+
+        /**
+         * 颜色转为RGBA格式
+         * @param {string} opacity 透明度0-1
+         * @author luwenjun 2018年8月9日
+         */
+        String.prototype.colorRgb = function (opacity) {
+            var reg = /^#([0-9a-fA-f]{3}|[0-9a-fA-f]{6})$/;
+            var sColor = this.toLowerCase();
+            if (sColor && reg.test(sColor)) {
+                if (sColor.length === 4) {
+                    var sColorNew = "#";
+                    for (var i = 1; i < 4; i += 1) {
+                        sColorNew += sColor.slice(i, i + 1).concat(sColor.slice(i, i + 1));
+                    }
+                    sColor = sColorNew;
+                }
+                //处理六位的颜色值
+                var sColorChange = [];
+                for (var i = 1; i < 7; i += 2) {
+                    sColorChange.push(parseInt("0x" + sColor.slice(i, i + 2)));
+                }
+                return "RGBA(" + sColorChange.join(",") + "," + opacity + ")";
+            } else {
+                return sColor;
+            }
+        }
+
+    </script>
+
+    <!--地图-->
+    <script>
+        /**
+         * ZINDEX 枚举，总体控制各类型layer层级
+         * @author luwenjun 2018年8月9日
+         */
+        ZINDEX = {
+            marker: 400,
+            line: 300,
+            polygon: 200,
+            layer: 100
+        }
+        /**
+         * 点样式
+         * @author luwenjun 2018年8月9日
+         */
+        var iconStyle = new ol.style.Style({
+            image: new ol.style.Icon(/** @type {olx.style.IconOptions} */ ({
+                anchor: [0.5, 27],
+                anchorXUnits: 'fraction',
+                anchorYUnits: 'pixels',
+                opacity: 0.75,
+                src: 'icon/getPointStylePic.png'
+            }))
+        });
+
+        /**
+         * 文字样式
+         * @author luwenjun 2018年8月9日
+         */
+        var textStyle = new ol.style.Style({
+            text: new ol.style.Text({
+                font: "13px Microsoft Yahei",
+                text: "",
+                fill: new ol.style.Fill({
+                    color: "#000"
+                }),
+                offsetX: 0,
+                offsetY: 0,
+                stroke: new ol.style.Stroke({color: "#fff", width: 2}),
+                textAlign: "center",
+                /*   backgroundFill: new ol.style.Fill({
+                       color: "#2196F3"
+                   }),
+                   padding: [4, 8, 4, 8]*/
+            })
+        });
+
+        /**
+         * 多边形样式 {"fillOpacity":"66","fillColor":"#7ec9b1","strokeColor":"#19AC9E","strokeWidth":1
+         * @author luwenjun 2018年8月9日
+         */
+        var polygonStyle = new ol.style.Style({
+            fill: new ol.style.Fill({
+                color: 'rgba(126,201,277,0.66)'
+            }),
+            stroke: new ol.style.Stroke({
+                color: '#19AC9E',
+                width: 2
+            })
+        });
+
+        //地图瓦片
+        var baselayers = [
+            new ol.layer.Tile({
+                projection: "EPSG:3857",
+                source: new ol.source.XYZ({
+                    attributions: ["@ K Y E "],
+                    urls: ['http://webrd01.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}']
+                    //urls:['http://t1.tianditu.com/DataServer?T=vec_w&x={x}&y={y}&L={z}']
+                    //  urls: ['http://cache1.arcgisonline.cn/arcgis/rest/services/ChinaOnlineCommunity/MapServer/tile/{z}/{y}/{x}']
+                })
+            })
+        ];
+
+        //地图初始化
+        var map = new ol.Map({
+            controls: ol.control.defaults().extend([
+                new ol.control.ScaleLine({
+                    units: 'metric'
+                })
+            ]),
+            layers: baselayers,
+            target: 'container',
+            view: new ol.View({
+                // projection: 'EPSG:3857',
+                center: new ol.proj.transform([106, 36], 'EPSG:4326', 'EPSG:3857'),
+                units: 'metric',
+                zoom: 5
+            })
+        });
+
+        //创建popup dom
+        var popup = document.createElement("div");
+        popup.id = 'popup';
+        popup.className = 'ol-popup';
+
+        var closer = document.createElement("a");
+        closer.id = "popup-closer";
+        closer.className = "ol-popup-closer";
+        closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        }
+
+        var content = document.createElement("div");
+        content.id = "popup-content";
+
+        popup.appendChild(closer);
+        popup.appendChild(content);
+
+        /**
+         * popup 弹出文字
+         * @author luwenjun 2018年8月17日
+         */
+        var overlay = new ol.Overlay({
+            element: popup,
+            autoPan: true,
+            offset: [2, -23],
+            autoPanAnimation: {
+                duration: 250
+            }
+        });
+
+        /**
+         * popup 退出按钮
+         * @author luwenjun 2018年8月17日
+         */
+        closer.onclick = function () {
+            overlay.setPosition(undefined);
+            closer.blur();
+            return false;
+        };
+        map.addOverlay(overlay);
+
+        var select, oldstyle, this_polygon;
+        /**
+         * 图形捕获事件
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol多边形样式
+         * @author luwenjun 2018年8月16日
+         */
+        var changeInteraction = function () {
+            if (select !== null) {
+                map.removeInteraction(select);
+            }
+
+            var changePolygonStyle = polygonStyle.clone();
+            changePolygonStyle.getFill().setColor("#CB3434".colorRgb(0.6));
+            changePolygonStyle.getStroke().setColor("#CB3434".colorRgb(1));
+            changePolygonStyle.getStroke().setWidth(8);
+
+            select = new ol.interaction.Select();
+
+            if (select !== null) {
+                map.addInteraction(select);
+                select.on('select', function (e) {
+                    //判断图形
+                    //  console.log(e)
+                    //高亮
+                    if (e.selected.length > 0) {
+                        e.target.getFeatures().forEach(function (geometry) {
+                            //  console.log(geometry);
+                            if (!geometry.geometryType) {
+                                return false;
+                            }
+                            if (geometry.geometryType == "polygon") {
+                                //记录本次样式
+                                oldstyle = geometry.getStyle();
+                                //恢复上个点击图形原有样式
+                                geometry.setStyle(changePolygonStyle);
+                                if (this_polygon) {
+                                    this_polygon.setStyle(oldstyle);
+                                }
+                                //保存本次样式
+                                this_polygon = geometry;
+
+                                //view
+                                map.getView().fit(this_polygon.getGeometry().getExtent());
+                            } else if (geometry.geometryType == "point") {
+                                this_polygon = geometry;
+                                //view
+                                var lnglat = new ol.proj.transform([parseFloat(this_polygon.kyeData.x), parseFloat(this_polygon.kyeData.y)], 'EPSG:4326', 'EPSG:3857');
+                                map.getView().setCenter(lnglat);
+                                map.getView().setZoom(12);
+                            }
+
+                        })
+
+                        //点击不为空
+
+                        //气泡
+                        Popup(this_polygon);
+                        //气泡连接菜单
+                        PopupOpenMenu(this_polygon);
+                    }else {
+                        //取消气泡
+                        $(closer).click();
+                        if (this_polygon) {
+                            this_polygon.setStyle(oldstyle);
+                        }
+                    }
+
+
+                });
+            }
+        }
+        changeInteraction();
+
+
+        function PopupOpenMenu(_this) {
+            // console.log(_this)
+            var treeOne, treeTwo;
+            var hashCode = _this.kyeData.layerCode;
+            var hashID = _this.kyeData.id;
+
+            if (_this.geometryType == "point") {
+                //一级菜单展开
+                $("#printMenu").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == hashCode.split("_")[0]) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                        treeOne = div;
+                    }
+                })
+
+                //二级菜单展开
+                $(treeOne).children("ul").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == (hashCode.split("_")[0] + "_" + hashCode.split("_")[1])) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                    }
+                })
+            } else if (_this.geometryType == "polygon") {
+                //一级菜单展开
+                $("#printMenu").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == hashCode.split("_")[0]) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                        treeOne = div;
+                    }
+                })
+
+                //二级菜单展开
+                $(treeOne).children("ul").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == (hashCode.split("_")[0] + "_" + hashCode.split("_")[1])) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                        treeTwo = div;
+                    }
+                })
+
+                //三级菜单展开
+                $(treeTwo).children("ul").children("li").map(function (i, div) {
+                    var flag = $(div).children("a");
+                    if ($(flag).attr("code") == (hashCode.split("_")[0] + "_" + hashCode.split("_")[1] + "_" + hashCode.split("_")[2]).substring(0, 11)) {
+                        if ($(flag).find("span").attr("class").indexOf("fa-angle-right") > -1) {
+                            $(flag).click();
+                        }
+                    }
+                    //  console.log(i, div);
+                })
+            }
+
+            setTimeout(function () {
+                window.location.hash = hashID;
+            }, 1000)
+        }
+
+        /**
+         * Popup绘制
+         * @param {object} this_polygon 更具自定义数据展示气泡
+         * @author luwenjun 2018年8月17日
+         */
+        function Popup(_this) {
+            var coordinate, poptext = "";
+            if (_this.geometryType == "point") {
+                var lnglat = new ol.proj.transform([parseFloat(_this.kyeData.x), parseFloat(_this.kyeData.y)], 'EPSG:4326', 'EPSG:3857');
+                _this.kyeData.infos.map(function (data) {
+                    if (data.fieldName && data.fieldValue) {
+                        poptext += "<p><b>" + data.fieldName + "</b> " + ((data.fieldValue == undefined) ? "" : data.fieldValue) + "</p>";
+                    }
+                })
+
+                poptext += "<p><b>ID</b> " + _this.kyeData.id + "</p>";
+                coordinate = lnglat;//
+
+
+            } else if (_this.geometryType == "polygon") {
+                _this.kyeData.infos.map(function (data) {
+                    if (data.fieldName && data.fieldValue) {
+                        poptext += "<p><b>" + data.fieldName + "</b> " + ((data.fieldValue == undefined) ? "" : data.fieldValue) + "</p>";
+                    }
+                })
+
+                poptext += "<p><b>面积</b> " + _this.kyeData.area + "</p>";
+                poptext += "<p><b>ID</b> " + _this.kyeData.id + "</p>";
+
+                //设置坐标展示popup 获取当前坐标 e.mapBrowserEvent.coordinate;
+                coordinate = [_this.kyeData.innerPoint.x, _this.kyeData.innerPoint.y];//
+
+
+            }
+            overlay.setPosition(coordinate);
+            content.innerHTML = poptext;
+
+            //视野缩进
+            /* map.getView().setCenter(coordinate);
+             map.getView().setZoom(12)*/
+        }
+
+
+        /**
+         * 多多边形绘制对象
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol多边形样式
+         * @author luwenjun 2018年8月9日
+         */
+        function MultiPolygon(polygonFeatures) {
+
+            var vectorSource = new ol.source.Vector({
+                features: polygonFeatures
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                zIndex: ZINDEX.polygon
+            });
+
+            map.addLayer(vectorLayer);
+
+            //  map.getView().fit(polygonFeature.getGeometry());
+            return vectorLayer;
+        }
+
+
+        /**
+         * label 绘制对象
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol点样式
+         * @author luwenjun 2018年8月9日
+         */
+        function Text(point, style) {
+            var iconFeatureArray = [];
+            for (var i in point) {
+                var iconFeature = new ol.Feature({
+                    geometry: new ol.geom.Point(point[i]),
+                    name: style.text
+                });
+                iconFeature.setStyle(style);
+                iconFeatureArray.push(iconFeature);
+            }
+
+            var vectorSource = new ol.source.Vector({
+                features: iconFeatureArray
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                zIndex: ZINDEX.marker
+            });
+
+            map.addLayer(vectorLayer);
+
+            return vectorLayer;
+        }
+
+        /**
+         * 点绘制对象
+         * @param {array} point 绘制点坐标数组
+         * @param {object} style ol点样式
+         * @author luwenjun 2018年8月9日
+         */
+
+        function Point(iconFeatureArray) {
+            var vectorSource = new ol.source.Vector({
+                features: iconFeatureArray
+            });
+
+            var vectorLayer = new ol.layer.Vector({
+                source: vectorSource,
+                zIndex: ZINDEX.marker
+            });
+
+            map.addLayer(vectorLayer);
+
+            return vectorLayer;
+        }
+
+        function FitView(kye_coord_arr) {
+            var extent = new ol.extent.boundingExtent(kye_coord_arr);
+            map.getView().fit(extent);
+        }
+    </script>
+
+    <!--业务-->
+    <script>
+        //点部提示详细信息框
+        var _kye_text;
+        //区域提示详细信息框
+        var _kye_polygon = [];
+        //批量绘制层
+        var _kye_overlays = [];
+
+        //缓存tree kye数列表
+        var datas = []
+
+        function loadMenu() {
+
+            var times = 0, files = ['tree', 'kye'], tree_data;
+            files.forEach(function (file) {
+                $.getJSON('./data/' + file + '.json', function (data) {
+                    datas.push({name: file, data: data});
+                    trigger();
+                });
+            });
+
+            function trigger() {
+                times++;
+                if (times === files.length) {
+                    complete()
+                }
+            }
+
+            function complete() {
+                console.log("下载成功")
+
+                datas.map(function (data) {
+                    if (data.name == "tree") {
+                        tree_data = data.data;
+                    }
+                })
+                for (var i in tree_data) {
+                    PrintMenu(tree_data[i]);
+                }
+
+                $("#printMenu").html(numeStr);
+                $("#printMenuMobil").html(numeStr);
+            }
+
+        }
+
+        loadMenu();
+
+        /**
+         * 加载菜单
+         * @author luwenjun 2018年8月9日
+         */
+        function PrintMenu(data) {
+            // console.log(data)
+            if (!data) {
+                console.warn("data 缺失")
+                return false;
+            }
+            var text = [], text_one = [];
+
+            text.push("<li class='ripple'> ");
+            if (data.code == "005") {
+                text.push("<a class='tree-toggle nav-header'  onclick='AjaxXH(this,1)' code='" + data.code + "'  name='" + data.code + "' > ");
+            } else {
+                text.push("<a class='tree-toggle nav-header'  onclick='AjaxXH(this,2) ' code='" + data.code + "' name='" + data.code + "'> ");
+            }
+
+            text.push("<span class='fa-angle-right fa left-arrow'></span>");
+            text.push(data.label);
+            text.push("    </a>");
+
+            if (data.code == "005") {
+                text.push("            <div class='eye_click' onclick='checked_box(this)' flag='0' code='" + data.code + "'><i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i></div> ");
+            } else {
+                text.push("          <div class='eye_click' tooggle='AjaxGet' flag='0' code='" + data.code + "'></div> ");
+            }
+
+            text.push("   <ul class='nav nav-list tree' style='display: none;'>");
+
+            for (var i in data.children) {
+
+                text_one.push("        <li class='ripple'>");
+                if (data.children[i].hasOwnProperty("children") && data.children[i].children.length > 0) {
+                    text_one.push("           <a class='sub-tree-toggle nav-header'  onclick='showtreetree(this);' code='" + data.children[i].code + "'>  ");
+                } else {
+                    text_one.push("           <a class='sub-tree-toggle nav-header'  onclick='showtreetree(this);add_children(this)' flag='0' code='" + data.children[i].code + "' name='" + data.children[i].code + "'>  ");
+                }
+                text_one.push("         <span class='fa-angle-right fa left-arrow'></span> ");
+                text_one.push(data.children[i].label);
+                text_one.push("           </a> ");
+                text_one.push("           <div class='eye_click' onclick='checked_box_button(this)' flag='0'  name='" + data.code + "' code='" + data.children[i].code + "'> ");
+                text_one.push("        <i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i></div>");
+                text_one.push("          <ul class='nav nav-list sub-tree' style='display: none'>");
+
+                var text_two = [];
+                if (data.children[i].hasOwnProperty("children") && data.children[i].children.length > 0) {
+                    //KYE区划加载
+                    for (var s in data.children[i].children) {
+                        text_two.push("                <li  class='ripple'><a class='sub-tree-toggle nav-header'  onclick='PrintTree(this)' tree='0' code='" + data.children[i].children[s].code + "'  name='" + data.children[i].children[s].code + "'>");
+                        text_two.push("                      <span class='fa-angle-right fa left-arrow'></span> " + data.children[i].children[s].label + "</a>");
+                        text_two.push("                      <div class='eye_click'  flag='0' onclick='PrintGroup(this)' code='" + data.children[i].children[s].code + "'><i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i></div> ");
+                        text_two.push("                     <ul class='nav nav-list sub-sub-tree' style='display: none;'></ul>");
+                        text_two.push("               </li>");
+                    }
+                } else {
+                    text_two.push("                <li><i  style='color:indianred;'>loading...</i></li>");
+                }
+                text_one.push(text_two.join(""));
+                text_one.push("            </ul>");
+                text_one.push("        </li>");
+            }
+
+            text.push(text_one.join(""));
+            text.push("    </ul>");
+            text.push("</li>");
+            numeStr += text.join("");
+
+        }
+
+        /**
+         * 根据code 加载相应点部四级详细列表
+         * @param {object} _this 点击事件this对象
+         * @author luwenjun 2018年8月9日
+         */
+        function PrintGroup(_this) {
+            var flag = $(_this).attr("flag");
+            var code = $(_this).attr("code");
+            if (!code) {
+                console.warn("code 缺失！")
+                return false;
+            }
+
+            var new_flag, open_class, close_class
+            if (flag == "0") {
+                new_flag = "1";
+                open_class = "fa-eye fa fa-1x  right-arrow text-right";
+                close_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            } else {
+                new_flag = "0";
+                close_class = "fa-eye fa fa-1x  right-arrow text-right";
+                open_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            }
+            $(_this).attr("flag", new_flag)
+            $(_this).find("i").removeClass(close_class);
+            $(_this).find("i").addClass(open_class);
+
+
+            var viewCoord = [];
+            if (flag == "0") {
+                var code = $(_this).attr("code");
+                var coord = DrawPolygon(code);
+                //console.log(code, coord)
+                viewCoord = coord;
+            } else {
+                for (var i in _kye_overlays) {
+                    if (_kye_overlays[i].code == code) {
+                        map.removeLayer(_kye_overlays[i].layer);
+                    }
+                }
+                _kye_overlays = [];
+            }
+
+            //调整视野
+            if (viewCoord.length > 0) {
+                FitView(viewCoord)
+            }
+        }
+
+        /**
+         * 根据code 打印四级详细列表
+         * @param {object} _this 点击事件this对象
+         * @author luwenjun 2018年8月9日
+         */
+        function PrintTree(_this) {
+            var code = $(_this).attr("code");
+            var text = "";
+
+            var treedata;
+            _cache_polygon.map(function (area) {
+                if (area.code == code.split("_")[0]) {
+                    treedata = area.data;
+                }
+            })
+            if (!treedata) {
+                console.warn("treedata 缺失！")
+                return false;
+            }
+
+            //重置上次缓存
+            _cache_buff = [];
+
+            treedata.dataList.map(function (polygon) {
+                if (polygon.layerCode.substring(0, 11) == code) {//infosName
+                    text += "<li code='" + code + "' onclick='AreaView(this)' title='" + polygon.infosName + "'><a  name='" + polygon.id + "'> <i class='fa fa-map-marker'></i> " + polygon.infosName + "</a></li>";
+
+                    //放置到缓存中，避免下次绘制遍历总数组
+                    _cache_buff.push(polygon);
+                }
+            })
+
+            $(_this).parent().find("ul").html(text);
+            showtreetreetree(_this);
+        }
+
+
+        /**
+         * 整合 延时加载列表
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月9日
+         */
+        function AjaxXH(_this, type) {
+            showtree(_this);
+            if (type == "2") {
+                setTimeout(function () {
+                    AjaxGetPolygon(_this);
+                }, 1000)
+            }
+        }
+
+
+        /**
+         * 加载详细区划列表
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月9日
+         */
+        function add_children(_this) {
+            //不在打印
+            if ($(_this).attr("flag") == "1") {
+                return false;
+            }
+            var code_children = $(_this).attr("code");
+            if (!code_children) {
+                console.warn("code缺失")
+                return false;
+            }
+
+            var kye_data;
+            datas.map(function (data) {
+                if (data.name == "kye") {
+                    kye_data = data.data;
+                }
+            })
+            if (!kye_data) {
+                console.warn("kye_data缺失")
+                return false;
+            }
+
+            var text_THREE = "";
+            kye_data.map(function (ii) {
+                if (ii.layerCode == code_children) {
+                    if (!ii.infosName || !ii.layerCode || !ii.x || !ii.y) {
+                        console.warn(ii);
+                        return false;
+                    }
+                    text_THREE += "<li onclick='MarkerView(this)' code='" + ii.layerCode + "' xy='" + ii.x + "," + ii.y + "' title='" + ii.infosName + "' ><a name='" + ii.id + "' >" + ii.infosName + "</a></li>";
+                }
+            });
+
+            $(_this).parent().find("ul").html(text_THREE);
+            $(_this).attr("flag", "1");
+
+        }
+
+
+        /**
+         * 点部点高亮
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月12日
+         */
+        function MarkerView(_this) {
+            var __name = $(_this).attr("title");
+            var __xy = $(_this).attr("xy");
+            if (_kye_text) {
+                map.removeLayer(_kye_text);
+            }
+
+            var style = textStyle.clone();
+            style.getText().getFill().setColor("#fff".colorRgb("0.8"));
+            style.getText().setFont("16px Microsoft YaHei");
+            style.getText().setText(__name);
+            style.getText().getStroke().setColor("red");
+            style.getText().getStroke().setWidth(0.5);
+            style.getText().setOffsetY(15);
+            style.getText().setBackgroundFill(new ol.style.Stroke({
+                color: "red"
+            }));
+            style.getText().setPadding([2, 3, 2, 3]);
+            //记录
+            var lnglat = new ol.proj.transform([parseFloat(__xy.split(",")[0]), parseFloat(__xy.split(",")[1])], 'EPSG:4326', 'EPSG:3857');
+            _kye_text = Text([lnglat], style);
+            //视野
+            map.getView().setCenter(lnglat);
+            map.getView().setZoom(12);
+        }
+
+
+        /**
+         * 多边形高亮
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月15日
+         */
+        function AreaView(_this) {
+            //高亮视野取消
+            //取消气泡
+            $(closer).click();
+            if (this_polygon) {
+                this_polygon.setStyle(oldstyle);
+            }
+            //_cache_buff
+            var title;
+            if ($(_this).attr("title")) {
+                title = $(_this).attr("title");
+            }
+            if (_cache_buff.length == 0) {
+                console.warn("_cache_buff 缺失");
+                return false
+            }
+
+            //每次加载即清空上次加载
+            if (_kye_polygon.length > 0) {
+                for (var i in _kye_polygon) {
+                    map.removeLayer(_kye_polygon[i])
+                }
+            }
+
+
+            var coords = [], _view_coord = [];
+            _cache_buff.map(function (polygon) {
+
+                //外挂数据
+                var myData = {
+                    area: polygon.area,
+                    id: polygon.id,
+                    infos: polygon.infos,
+                    infosName: polygon.infosName,
+                    innerPoint: polygon.innerPoint,
+                    layerCode: polygon.layerCode
+                }
+
+                var polygon_style = polygonStyle.clone();
+                //执行绘制
+                if (polygon.hasOwnProperty("style")) {
+                    var fillopacity = parseFloat(polygon.style.fillOpacity);
+
+                    if (fillopacity > 1) {
+                        fillopacity = fillopacity * 0.01
+                    }
+                    polygon_style.getFill().setColor(polygon.style.fillColor.colorRgb(fillopacity));
+                    polygon_style.getStroke().setColor(polygon.style.strokeColor);
+                    polygon_style.getStroke().setWidth(polygon.style.strokeWidth);
+                }
+
+                if (polygon.infosName == title || !title) {
+                    var coord = [], polygonFeature;
+                    //单个区划边界
+                    if (polygon.region.parts.length == 1) {
+                        for (var i in polygon.region.points) {
+                            var lnglat = [polygon.region.points[i].x, polygon.region.points[i].y];
+                            coord.push(lnglat);
+
+                            _view_coord.push(lnglat)
+                        }
+                        polygonFeature = new ol.Feature({
+                            geometry: new ol.geom.MultiPolygon([[coord]])
+                        });
+
+                    } else {
+                        //多个区划边界
+                        var orderbyCoord;
+                        var _polygon = polygon.region.points.slice(0);//克隆
+                        for (var i = 0; i < polygon.region.parts.length; i++) {
+                            orderbyCoord = _polygon.splice(0, polygon.region.parts[i]);
+                            //强制转换
+                            var newarr = [];
+                            for (var c in orderbyCoord) {
+                                var lnglat = [orderbyCoord[c].x, orderbyCoord[c].y];
+                                newarr.push(lnglat);
+
+                                _view_coord.push(lnglat)
+                            }
+                            coord.push(newarr);
+                        }
+                        polygonFeature = new ol.Feature({
+                            geometry: new ol.geom.MultiPolygon([coord])
+                        });
+
+                    }
+
+                    polygonFeature.setStyle(polygon_style);
+                    polygonFeature.geometryType = "polygon";
+                    polygonFeature.kyeData = myData;
+
+                    coords.push(polygonFeature);
+
+                    //绘制标题
+                    var lnglat = [polygon.innerPoint.x, polygon.innerPoint.y];
+
+                    var _text_style = textStyle.clone();
+                    _text_style.getText().getFill().setColor("red");
+                    _text_style.getText().setFont("14px Microsoft YaHei");
+                    _text_style.getText().setText(polygon.infosName);
+                    _text_style.getText().getStroke().setColor("#000");
+                    _text_style.getText().getStroke().setWidth(0.6);
+
+                    var marker = Text([lnglat], _text_style);
+                    //放入全局缓存
+                    _kye_polygon.push(marker);
+                }
+                //--------------
+            })
+            var vectorLayer = MultiPolygon(coords);
+            _kye_polygon.push(vectorLayer);
+
+            //视野控制
+            FitView(_view_coord);
+        }
+
+
+        /**
+         * 缓存区划数据
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月10日
+         */
+        function AjaxGetPolygon(_this) {
+            var code = $(_this).attr("code");
+            if (!code) {
+                console.warn("code 缺失")
+                return false;
+            }
+
+            //KYE排除
+            if (code == "005") {
+                return false
+            }
+
+            //判断是否拥有缓存
+            if (_cache_polygon.length > 0) {
+                for (var i in _cache_polygon) {
+                    if (_cache_polygon[i].code == code && _cache_polygon[i].data) {
+                        return false;
+                    }
+                }
+            }
+
+            $.ajax({
+                url: "/KYE/data/" + code + ".json",
+                async: true,
+                cache: true,
+                dataType: "json",
+                beforeSend: function () {
+                    // jumpPage();
+                    $("div[tooggle=AjaxGet]").map(function (i, dom) {
+                        if ($(dom).attr("code") == code) {
+                            $(dom).html("<i class='fa fa-spinner fa-pulse fa-1x ' aria-hidden='true'></i>");
+                        }
+                    })
+                },
+                error: function () {
+                    console.warn("请求错误");
+                    return false;
+                },
+                success: function (data) {
+                    $("#spin").remove();
+
+                    //全局赋值
+                    // quhua_data = data;
+                    _cache_polygon.push({code: code, data: data});
+
+                    $("div[tooggle=AjaxGet]").map(function (i, dom) {
+                        if ($(dom).attr("code") == code) {
+                            $(dom).html("<i class='fa-eye-slash fa fa-1x  right-arrow text-right'></i>");
+                            $(dom).attr("onclick", "checked_box(this)")
+                        }
+
+                    })
+                }
+            })
+
+        }
+
+
+        /**
+         * 一级显示层控制
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月10日
+         */
+        function checked_box(_this) {
+            var flag = $(_this).attr("flag");
+            var code = $(_this).attr("code");
+
+            //变更标识与icon
+            var new_flag, open_class, close_class
+            if (flag == "0") {
+                new_flag = "1";
+                open_class = "fa-eye fa fa-1x  right-arrow text-right";
+                close_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            } else {
+                new_flag = "0";
+                close_class = "fa-eye fa fa-1x  right-arrow text-right";
+                open_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            }
+            $(_this).attr("flag", new_flag)
+            $(_this).find("i").removeClass(close_class).addClass(open_class);
+            $(_this).parent().find("ul i").map(function (i, dom) {
+                $(dom).attr("flag", new_flag);
+                $(dom).removeClass(close_class).addClass(open_class);
+            })
+
+            var code_children = [];
+            $("div[name=" + code + "]").map(function (i, div) {
+                if (($("div[name=" + code + "]").length / 2) > i) {
+                    code_children.push($(div).attr("code"))
+                }
+            })
+
+            //总和视野控制
+            var viewCoord = [];
+
+            //清空添加
+            if (flag == "0") {
+                //绘制数据
+                code_children.map(function (code) {
+                    if (code.split("_")[0] == "005") {
+                        var coord = DrawPoint(code, false);
+                        viewCoord = viewCoord.concat(coord)
+                    } else {
+                        var coord = DrawPolygon(code);
+                        viewCoord = viewCoord.concat(coord)
+                    }
+
+                })
+//console.log(viewCoord)
+                //调整视野
+                if (viewCoord.length > 0) {
+                    map.getView().fit(new ol.extent.boundingExtent(viewCoord));
+                }
+
+            } else {
+                for (var i in _kye_overlays) {
+                    map.removeLayer(_kye_overlays[i].layer);
+                }
+                _kye_overlays = [];
+            }
+        }
+
+
+        /**
+         * 二级显示层控制
+         * @param {object} _this dom对象
+         * @author luwenjun 2018年8月15日
+         */
+        function checked_box_button(_this) {
+            var flag = $(_this).attr("flag");
+            var code = $(_this).attr("code");
+            var name = $(_this).attr("name");
+            if (!code || !name) {
+                console.warn("code | name 缺失！")
+                return false;
+            }
+
+            //变更标识与icon
+            var new_flag, open_class, close_class
+            if (flag == "0") {
+                new_flag = "1";
+                open_class = "fa-eye fa fa-1x  right-arrow text-right";
+                close_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            } else {
+                new_flag = "0";
+                close_class = "fa-eye fa fa-1x  right-arrow text-right";
+                open_class = "fa-eye-slash fa fa-1x  right-arrow text-right";
+            }
+            $(_this).attr("flag", new_flag)
+            $(_this).find("i").removeClass(close_class).addClass(open_class);
+
+            //查找所有子项
+            $(_this).parent().find("ul").find("i").map(function (i, dom) {
+                //console.log(i,dom);
+                $(dom).attr("flag", new_flag)
+                $(dom).removeClass(close_class);
+                $(dom).addClass(open_class);
+            })
+
+            //总和视野控制
+            var viewCoord = [];
+
+            //绘制数据
+            if (flag == "0") {
+                if (name == "005") {
+                    var coord = DrawPoint(code, true);
+                    viewCoord = viewCoord.concat(coord)
+                } else {
+                    var coord = DrawPolygon(code);
+                    viewCoord = viewCoord.concat(coord)
+                }
+
+                //调整视野
+                if (viewCoord.length > 0) {
+                    map.getView().fit(new ol.extent.boundingExtent(viewCoord));
+                }
+            } else {
+                //清空
+                for (var i in _kye_overlays) {
+                    // if (code == _kye_overlays[i].code) {
+                    map.removeLayer(_kye_overlays[i].layer);
+                    //  }
+                }
+                _kye_overlays = [];
+            }
+        }
+
+        /**
+         * 绘制网点
+         * @param {string} code 编码
+         * @param {boolean} view 是否自适应视野
+         * @return 返回当前数组，用以视野控制
+         * @author luwenjun 2018年8月10日
+         */
+        function DrawPoint(code, view) {
+            if (!code) {
+                console.log("code 缺失");
+                return false;
+            }
+
+            var kye_data;
+            datas.map(function (data) {
+                if (data.name == "kye") {
+                    kye_data = data.data;
+                }
+            })
+
+            if (!kye_data) {
+                console.warn("kye_data缺失")
+                return false;
+            }
+
+            var kye_coord_arr = [];
+
+            //缓存中查找
+            var layer_cache;
+            _kye_overlays.map(function (layer) {
+                if (layer.code == code) {
+                    layer_cache = layer.layer;
+                }
+            });
+
+            if (layer_cache) {
+                map.addLayer(layer_cache);
+            } else {
+
+                var iconFeatureArray = [];
+                kye_data.map(function (ii) {
+                    if (ii.layerCode == code) {
+                        if (ii.infosName || ii.layerCode || ii.x || ii.y) {
+                            var lnglat = new ol.proj.transform([ii.x, ii.y], 'EPSG:4326', 'EPSG:3857');
+                            var iconFeature = new ol.Feature({
+                                geometry: new ol.geom.Point(lnglat)
+                            });
+
+                            //自定义数据入参
+                            var mydata = {
+                                area: ii.area,
+                                id: ii.id,
+                                infos: ii.infos,
+                                infosName: ii.infosName,
+                                x: ii.x,
+                                y: ii.y,
+                                layerCode: ii.layerCode
+                            }
+
+                            iconFeature.kyeData = mydata;
+                            iconFeature.setStyle(iconStyle);
+                            iconFeature.geometryType = "point";
+                            iconFeatureArray.push(iconFeature);
+
+                            kye_coord_arr.push(lnglat);
+                        }
+
+                    }
+                });
+
+                var vectorLayer = Point(iconFeatureArray);
+                _kye_overlays.push({code: code, layer: vectorLayer})
+            }
+
+            //设置视野
+            if (view == true) {
+                if (layer_cache) {
+                    map.getView().fit(layer_cache.getSource().getExtent());
+                } else if (vectorLayer) {
+                    map.getView().fit(vectorLayer.getSource().getExtent());
+                }
+            }
+
+            return kye_coord_arr;
+        }
+
+
+        /**
+         * 绘制区划边界
+         * @param {string} code 编码
+         * @return 返回当前数组，用以视野控制
+         * @author luwenjun 2018年8月10日
+         */
+        function DrawPolygon(code) {
+            if (!code) {
+                console.log("code 缺失");
+                return false;
+            }
+
+            var _view_coord = [];
+
+            //缓存中查找
+            var _cache = false;
+            _kye_overlays.map(function (layer) {
+                if (layer.code == code) {
+                    map.addLayer(layer.layer);
+                    _cache = true;
+                }
+            });
+
+            if (_cache == false) {
+                var _polygon;
+                _cache_polygon.map(function (data) {
+                    //console.log(polygon)
+                    if (data.code == code.split("_")[0]) {
+                        _polygon = data.data.dataList;
+                    }
+                })
+                var coords = []
+                _polygon.map(function (polygon) {
+                    //自定义数据入参
+                    var myData = {
+                        area: polygon.area,
+                        id: polygon.id,
+                        infos: polygon.infos,
+                        infosName: polygon.infosName,
+                        innerPoint: polygon.innerPoint,
+                        layerCode: polygon.layerCode
+                    }
+                    var _polygon_style = polygonStyle.clone();
+                    //样式
+                    if (polygon.hasOwnProperty("style")) {
+                        var fillopacity = parseFloat(polygon.style.fillOpacity);
+
+                        if (fillopacity > 1) {
+                            fillopacity = fillopacity * 0.01
+                        }
+                        _polygon_style.getFill().setColor(polygon.style.fillColor.colorRgb(fillopacity));
+                        _polygon_style.getStroke().setColor(polygon.style.strokeColor);
+                        _polygon_style.getStroke().setWidth(polygon.style.strokeWidth);
+                    }
+
+                    var flag;
+                    if (code == polygon.layerCode.substring(0, 7)) {
+                        //一级与二级eye按钮显示条件
+                        flag = true;
+                    } else if (code == polygon.layerCode) {
+                        //三级eye 按钮显示条件
+                        flag = true;
+                    } else if (code == polygon.layerCode.substring(0, 11)) {
+                        //应为广东省code特殊，细化了code编码，增加判断
+                        flag = true;
+                    }
+
+                    if (flag == true) {
+                        var coord = [], polygonFeature;
+                        //单个区划边界
+                        if (polygon.region.parts.length == 1) {
+                            for (var i in polygon.region.points) {
+                                var lnglat = [polygon.region.points[i].x, polygon.region.points[i].y];
+                                coord.push(lnglat);
+
+                                _view_coord.push(lnglat)
+                            }
+                            polygonFeature = new ol.Feature({
+                                geometry: new ol.geom.MultiPolygon([[coord]])
+                            });
+
+                        } else {
+                            //多个区划边界
+                            var orderbyCoord;
+                            var _polygon = polygon.region.points.slice(0);//克隆
+                            for (var i = 0; i < polygon.region.parts.length; i++) {
+                                orderbyCoord = _polygon.splice(0, polygon.region.parts[i]);
+                                //强制转换
+                                var newarr = [];
+                                for (var c in orderbyCoord) {
+                                    var lnglat = [orderbyCoord[c].x, orderbyCoord[c].y];
+                                    newarr.push(lnglat);
+
+                                    _view_coord.push(lnglat)
+                                }
+                                coord.push(newarr);
+                            }
+                            polygonFeature = new ol.Feature({
+                                geometry: new ol.geom.MultiPolygon([coord])
+                            });
+
+                        }
+
+                        polygonFeature.setStyle(_polygon_style);
+                        polygonFeature.geometryType = "polygon";
+                        polygonFeature.kyeData = myData;
+
+                        coords.push(polygonFeature);
+
+                        //绘制标题
+                        var lnglat = [polygon.innerPoint.x, polygon.innerPoint.y];
+
+                        var _text_style = textStyle.clone();
+                        _text_style.getText().getFill().setColor("red");
+                        _text_style.getText().setFont("14px Microsoft YaHei");
+                        _text_style.getText().setText(polygon.infosName);
+                        _text_style.getText().getStroke().setColor("#000");
+                        _text_style.getText().getStroke().setWidth(0.6);
+
+                        var marker = Text([lnglat], _text_style);
+                        //放入全局缓存
+                        _kye_overlays.push({code: code, layer: marker});
+                    }
+                })
+
+                var vectorLayer = MultiPolygon(coords);
+                //放入全局缓存
+                _kye_overlays.push({code: code, layer: vectorLayer});
+            }
+
+            return _view_coord;
+        }
+
+
+    </script>
+
+    <div class="jqvmap-label" style="display: none; left: 771px; top: 1966px;">Russian Federation</div>
+    <!-- end: Javascript -->
+
+</body>
+
+</html>
